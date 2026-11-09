@@ -3,140 +3,251 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Chat 💬</title>
+<title>Chat</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg0:#1e1f22;--bg1:#2b2d31;--bg2:#313338;--bg3:#383a40;--tx:#dbdee1;--mut:#949ba4;--acc:#5865f2;--ok:#23a55a;--bad:#f23f43}
-html,body{height:100%;background:var(--bg2);color:var(--tx);font-family:"gg sans","Segoe UI",Roboto,Arial,sans-serif;font-size:15px}
-button{font:inherit;cursor:pointer;border:0}
-input,textarea{font:inherit;color:var(--tx);background:var(--bg0);border:0;border-radius:6px;padding:10px;outline:none;width:100%}
+:root{--rail:#121214;--side:#121214;--main:#0b0b0d;--card:#1a1a1e;--hover:#1f1f24;--sel:#26262c;--line:#26262b;--tx:#dbdee1;--mut:#949ba4;--dim:#6d6f78;--acc:#5865f2;--ok:#23a55a;--idle:#f0b232;--dnd:#f23f43;--bad:#f23f43}
+html,body{height:100%;background:var(--main);color:var(--tx);font-family:"gg sans","Noto Sans","Segoe UI",Roboto,Arial,sans-serif;font-size:15px;overflow:hidden}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+input,textarea{font:inherit;color:var(--tx);background:#0e0e10;border:1px solid var(--line);border-radius:8px;padding:10px 12px;outline:none;width:100%}
+input:focus,textarea:focus{border-color:var(--acc)}
 .hidden{display:none!important}
-/* login */
-#login{display:flex;align-items:center;justify-content:center;height:100%;background:linear-gradient(135deg,#404eed,#1e1f22)}
-.card{background:var(--bg2);padding:28px;border-radius:10px;width:min(420px,92vw);box-shadow:0 8px 30px #0008}
-.card h1{text-align:center;margin-bottom:6px}.card p{text-align:center;color:var(--mut);margin-bottom:18px}
-.card label{display:block;font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;margin:12px 0 6px}
-.btn{background:var(--acc);color:#fff;padding:11px 16px;border-radius:6px;font-weight:600;width:100%;margin-top:18px}
-.btn:hover{filter:brightness(1.1)}.link{color:#00a8fc;background:none;margin-top:12px;font-size:14px}
-.err{color:var(--bad);font-size:13px;margin-top:10px;min-height:16px}
-/* app */
+svg{display:block}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* ---------- login ---------- */
+#login{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 20% 20%,#3b44c4 0,transparent 45%),radial-gradient(circle at 80% 80%,#7b2fd1 0,transparent 45%),#0b0b0d;z-index:80}
+.lcard{background:#18181b;border:1px solid var(--line);padding:32px;border-radius:12px;width:min(460px,92vw);box-shadow:0 12px 40px #000a}
+.lcard h1{text-align:center;font-size:24px;margin-bottom:6px}.lcard p.sub{text-align:center;color:var(--mut);margin-bottom:18px}
+label.l{display:block;font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.02em;margin:14px 0 7px}
+.btn{background:var(--acc);color:#fff;padding:11px 16px;border-radius:8px;font-weight:600;width:100%;margin-top:18px;transition:.15s}
+.btn:hover{filter:brightness(1.12)}.btn.gray{background:#2b2b31}.btn.red{background:var(--bad)}.btn.sm{width:auto;padding:8px 14px;margin:0;font-size:14px}
+.link{color:#00a8fc;font-size:14px}.link:hover{text-decoration:underline}
+.err{color:#ff6b6e;font-size:13px;margin-top:10px;min-height:16px}
+.gbtn{background:#fff;color:#1e1f22}
+/* ---------- layout ---------- */
 #app{display:flex;height:100%}
-#servers{width:72px;background:var(--bg0);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:8px;overflow-y:auto}
-.srv{width:48px;height:48px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:22px;transition:.15s;position:relative;color:var(--tx)}
-.srv:hover,.srv.on{border-radius:16px;background:var(--acc)}
-.srv.add{color:var(--ok);font-size:26px}.srv.add:hover{background:var(--ok);color:#fff}
-.sep{width:32px;height:2px;background:var(--bg3)}
-#side{width:240px;background:var(--bg1);display:flex;flex-direction:column}
-#srvName{padding:14px 16px;font-weight:700;border-bottom:1px solid #0003;display:flex;justify-content:space-between;align-items:center;gap:6px}
-#srvName button{background:none;color:var(--mut);font-size:16px}
-#chans{flex:1;overflow-y:auto;padding:10px 8px}
-.cat{font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;padding:10px 8px 4px;display:flex;justify-content:space-between}
-.cat button{background:none;color:var(--mut);font-size:18px;line-height:1}
-.ch{padding:7px 8px;border-radius:5px;color:var(--mut);cursor:pointer;display:flex;gap:6px;align-items:center}
-.ch:hover{background:var(--bg3);color:var(--tx)}.ch.on{background:#404249;color:#fff}
-#me{background:#232428;padding:9px 10px;display:flex;align-items:center;gap:8px}
-#me .nm{flex:1;font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#me button{background:none;color:var(--mut);font-size:17px}
-.av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;flex-shrink:0;position:relative}
-.dot{position:absolute;right:-2px;bottom:-2px;width:12px;height:12px;border-radius:50%;border:3px solid var(--bg1);background:#80848e}.dot.on{background:var(--ok)}
-#main{flex:1;display:flex;flex-direction:column;min-width:0}
-#top{height:50px;padding:0 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #0003;font-weight:700}
-#top .sp{flex:1}#top button{background:none;color:var(--mut);font-size:19px}
+#rail{width:72px;background:var(--rail);display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:8px;overflow-y:auto;scrollbar-width:none;flex-shrink:0}
+#rail::-webkit-scrollbar{display:none}
+.rb{width:48px;height:48px;border-radius:50%;background:#1f1f24;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;transition:border-radius .15s,background .15s;position:relative;flex-shrink:0;color:var(--tx);overflow:visible}
+.rb img{width:100%;height:100%;border-radius:inherit;object-fit:cover}
+.rb:hover,.rb.on{border-radius:16px}
+.rb:hover:not(.img),.rb.on:not(.img){background:var(--acc);color:#fff}
+.rb.home{background:#1f1f24}.rb.home.on,.rb.home:hover{background:var(--acc)}
+.rb.green{color:var(--ok)}.rb.green:hover{background:var(--ok);color:#fff}
+.pill{position:absolute;left:-12px;width:4px;border-radius:0 4px 4px 0;background:#fff;height:0;transition:.15s}
+.rb:hover .pill{height:20px}.rb.on .pill{height:40px}
+.badge{position:absolute;right:-4px;bottom:-4px;background:var(--bad);color:#fff;font-size:11px;font-weight:700;border-radius:10px;padding:1px 5px;border:3px solid var(--rail);min-width:20px;text-align:center}
+.rsep{width:32px;height:2px;background:var(--line);border-radius:1px;flex-shrink:0}
+#side{width:300px;background:var(--side);display:flex;flex-direction:column;border-left:1px solid #0006;flex-shrink:0}
+#sideHead{height:52px;display:flex;align-items:center;padding:0 10px 0 16px;border-bottom:1px solid var(--line);gap:8px;flex-shrink:0}
+#sideHead .t{flex:1;font-weight:700;display:flex;align-items:center;gap:4px;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#sideHead .hb{color:var(--mut);padding:5px;border-radius:5px}#sideHead .hb:hover{color:var(--tx)}
+.findbtn{flex:1;background:#1f1f24;color:var(--tx);border-radius:8px;padding:7px;font-size:13px;font-weight:600}
+#sideBody{flex:1;overflow-y:auto;padding:8px}
+.nav{display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:8px;color:var(--mut);cursor:pointer;font-weight:500;margin-bottom:2px}
+.nav:hover{background:var(--hover);color:var(--tx)}.nav.on{background:var(--sel);color:#fff}
+.nav .sp{flex:1}.cnt{background:var(--bad);color:#fff;font-size:11px;font-weight:700;border-radius:10px;padding:1px 6px}
+.sec{display:flex;align-items:center;justify-content:space-between;padding:16px 8px 6px;font-size:13px;color:var(--mut);font-weight:600}
+.sec button{color:var(--mut);font-size:18px;line-height:1}.sec button:hover{color:var(--tx)}
+.cat{display:flex;align-items:center;gap:2px;padding:16px 4px 4px;font-size:12px;color:var(--mut);font-weight:600;cursor:pointer}
+.cat .sp{flex:1}.cat button{color:var(--mut);font-size:18px;line-height:1;padding:0 4px}.cat:hover{color:var(--tx)}
+.ch{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;color:var(--mut);cursor:pointer;margin:1px 0}
+.ch .h{font-size:20px;width:20px;text-align:center;color:var(--dim)}
+.ch .n{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.ch .ia{display:none;gap:4px;color:var(--mut)}.ch:hover .ia,.ch.on .ia{display:flex}
+.ch:hover{background:var(--hover);color:var(--tx)}.ch.on{background:var(--sel);color:#fff}
+.ch.unread{color:#fff;font-weight:600}
+.dm{display:flex;align-items:center;gap:12px;padding:6px 8px;border-radius:8px;color:var(--mut);cursor:pointer}
+.dm:hover{background:var(--hover);color:var(--tx)}.dm.on{background:var(--sel);color:#fff}
+.dm .n{flex:1;min-width:0}.dm .n b{display:block;font-weight:500;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.dm .n small{font-size:12px;color:var(--dim);display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.dm .x{visibility:hidden;color:var(--mut)}.dm:hover .x{visibility:visible}
+/* user panel */
+#up{margin:8px;background:#1a1a1e;border:1px solid var(--line);border-radius:10px;padding:8px;display:flex;align-items:center;gap:6px;flex-shrink:0}
+#up .who{flex:1;display:flex;align-items:center;gap:8px;cursor:pointer;border-radius:6px;padding:2px;min-width:0}
+#up .who:hover{background:var(--hover)}
+#up .who .n{min-width:0}#up .who b{display:block;font-size:14px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}#up .who small{display:block;font-size:12px;color:var(--mut)}
+#up .ub{color:var(--mut);padding:6px;border-radius:6px}#up .ub:hover{background:var(--hover);color:var(--tx)}#up .ub.off{color:var(--bad)}
+/* avatars */
+.av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;flex-shrink:0;position:relative;background-size:cover;background-position:center}
+.st{position:absolute;right:-2px;bottom:-2px;border-radius:50%;border:3px solid var(--side);background:#80848e}
+.st.online{background:var(--ok)}.st.idle{background:var(--idle)}.st.dnd{background:var(--dnd)}
+/* main */
+#main{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--main)}
+#top{height:52px;padding:0 12px 0 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line);flex-shrink:0}
+#top .tt{font-weight:700;display:flex;align-items:center;gap:8px;white-space:nowrap}
+#top .sp{flex:1}#top .tb{color:var(--mut);padding:4px}#top .tb:hover,#top .tb.on{color:var(--tx)}
+#top .tab{padding:3px 10px;border-radius:6px;color:var(--mut);font-weight:500;white-space:nowrap}#top .tab:hover{background:var(--hover);color:var(--tx)}#top .tab.on{background:var(--sel);color:#fff}
+#top .tab.add{background:var(--acc);color:#fff;font-weight:600}#top .tab.add.on{background:transparent;color:#5be38d}
+#top input.srch{width:220px;padding:5px 10px;font-size:13px;background:#0e0e10}
 #menuBtn{display:none}
-#msgs{flex:1;overflow-y:auto;padding:16px 0}
-.msg{display:flex;gap:14px;padding:4px 16px;position:relative}
-.msg:hover{background:#2e3035}
-.msg.cont{padding-top:1px}.msg.cont .av{visibility:hidden;height:0}
+#content{flex:1;display:flex;min-height:0}
+#center{flex:1;display:flex;flex-direction:column;min-width:0}
+#msgs{flex:1;overflow-y:auto;padding:16px 0 8px}
+#right{width:340px;border-left:1px solid var(--line);overflow-y:auto;padding:16px;flex-shrink:0}
+.msg{display:flex;gap:16px;padding:3px 16px 3px 16px;position:relative;margin-top:14px}
+.msg.cont{margin-top:0}.msg:hover{background:#121216}
+.msg .lt{width:40px;flex-shrink:0}.msg.cont .lt .av{display:none}
+.msg .lt .ht{display:none;font-size:10px;color:var(--dim);text-align:right;padding-top:4px}.msg.cont:hover .lt .ht{display:block}
 .msg .bd{min-width:0;flex:1}
-.msg .hd{display:flex;gap:8px;align-items:baseline}.msg .au{font-weight:600}
-.msg .tm{font-size:11px;color:var(--mut)}
-.msg .tx{white-space:pre-wrap;word-wrap:break-word;line-height:1.38}
-.msg .tx .ed{font-size:10px;color:var(--mut)}
-.msg .acts{position:absolute;right:14px;top:-10px;background:var(--bg2);border:1px solid #0004;border-radius:6px;display:none}
-.msg:hover .acts{display:flex}.acts button{background:none;padding:4px 7px;color:var(--mut)}.acts button:hover{color:#fff}
+.msg .hd{display:flex;gap:8px;align-items:center}.msg .au{font-weight:600;cursor:pointer}.msg .au:hover{text-decoration:underline}
+.msg .tm{font-size:12px;color:var(--dim)}
+.msg .tx{white-space:pre-wrap;word-wrap:break-word;line-height:1.4;color:#e3e5e8}
+.msg .tx .ed{font-size:10px;color:var(--dim)}
+.msg .im{max-width:min(400px,100%);max-height:320px;border-radius:8px;margin-top:6px;cursor:pointer;display:block}
+.acts{position:absolute;right:16px;top:-14px;background:#1a1a1e;border:1px solid var(--line);border-radius:8px;display:none;padding:2px}
+.msg:hover .acts{display:flex}.acts button{padding:5px 7px;color:var(--mut);border-radius:5px}.acts button:hover{background:var(--hover);color:#fff}
 .rx{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
-.rx span{background:var(--bg3);border-radius:8px;padding:2px 7px;font-size:13px;cursor:pointer;border:1px solid transparent}
-.rx span.mine{border-color:var(--acc);background:#3c4270}
-.welcome{padding:16px;color:var(--mut)}.welcome h2{color:var(--tx);font-size:28px;margin-bottom:6px}
-#composer{padding:0 16px 20px}
-#composer form{display:flex;background:var(--bg3);border-radius:8px;align-items:flex-end}
-#composer textarea{background:none;resize:none;max-height:150px;padding:12px}
-#composer button{background:none;color:var(--mut);padding:12px;font-size:18px}
-#typing{height:18px;font-size:12px;color:var(--mut);padding:2px 18px}
-#members{width:230px;background:var(--bg1);overflow-y:auto;padding:12px 8px}
-.mem{display:flex;gap:10px;align-items:center;padding:6px 8px;border-radius:5px}
-.mem:hover{background:var(--bg3)}.mem .nm{font-size:14px}.mem.off{opacity:.45}
-.crown{font-size:12px}
+.rx span{background:#1f1f24;border-radius:8px;padding:2px 8px;font-size:13px;cursor:pointer;border:1px solid transparent}
+.rx span.mine{border-color:var(--acc);background:#2a2d55}
+.chwel{padding:16px}.chwel .big{width:68px;height:68px;border-radius:50%;background:#26262c;display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:10px}
+.chwel h2{font-size:30px;margin-bottom:4px}.chwel p{color:var(--mut)}
+.welcome{max-width:420px;margin:auto;text-align:center;padding:20px}
+.welcome h2{font-size:28px;line-height:1.25;margin-bottom:8px}.welcome p{color:var(--mut);font-size:14px;margin-bottom:16px}
+.step{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:8px;font-weight:600;font-size:14px;cursor:pointer;text-align:left;width:100%}
+.step:hover{background:#222227}.step .e{font-size:20px}.step .sp{flex:1}.step .ar{color:var(--mut)}
+.step.done{opacity:.55}.step.done .ar{color:var(--ok)}
+#typing{height:20px;font-size:12px;color:var(--mut);padding:0 18px}
+#composer{padding:0 16px 4px}
+#composer form{display:flex;background:#1a1a1e;border:1px solid var(--line);border-radius:10px;align-items:flex-end}
+#composer textarea{background:none;border:0;resize:none;max-height:180px;padding:12px 4px}
+#composer .cb{color:var(--mut);padding:11px 12px}#composer .cb:hover{color:var(--tx)}
+#preview{display:flex;gap:8px;padding:8px 0 0}#preview img{height:80px;border-radius:6px}
+/* friends */
+.flist{padding:16px 24px;flex:1;overflow-y:auto}
+.fhead{font-size:12px;font-weight:600;color:var(--mut);text-transform:uppercase;padding:8px 0;border-bottom:1px solid var(--line);margin-bottom:6px}
+.frow{display:flex;align-items:center;gap:12px;padding:10px 8px;border-radius:8px;border-top:1px solid #ffffff08;cursor:pointer}
+.frow:hover{background:var(--hover)}.frow .n{flex:1;min-width:0}.frow .n b{display:block}.frow .n small{color:var(--mut);font-size:13px}
+.rbtn{width:36px;height:36px;border-radius:50%;background:#1f1f24;color:var(--mut);display:flex;align-items:center;justify-content:center}
+.rbtn:hover{color:#fff}.rbtn.g:hover{color:var(--ok)}.rbtn.r:hover{color:var(--bad)}
+.emptyc{flex:1;display:flex;align-items:center;justify-content:center;color:var(--mut);text-align:center;padding:30px;flex-direction:column;gap:10px}
+.addf h2{font-size:16px;text-transform:uppercase;margin-bottom:6px}.addf p{color:var(--mut);font-size:14px;margin-bottom:14px}
+.addf .bx{display:flex;gap:8px;background:#0e0e10;border:1px solid var(--line);border-radius:8px;padding:6px}
+.addf .bx input{border:0;background:none}
+.actcard{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;text-align:center}
+.actcard b{display:block;margin-bottom:6px}.actcard p{color:var(--mut);font-size:13px}
+/* members */
+.mem{display:flex;gap:12px;align-items:center;padding:6px 8px;border-radius:8px;cursor:pointer}
+.mem:hover{background:var(--hover)}.mem .n{font-size:15px;font-weight:500}.mem.off{opacity:.4}
+.mhead{font-size:12px;font-weight:600;color:var(--mut);text-transform:uppercase;padding:14px 8px 4px}
+.tag{font-size:10px;font-weight:800;padding:1px 5px;border-radius:4px;background:#fbbf24;color:#000;margin-left:4px;vertical-align:middle}
+.tag.dev{background:var(--acc);color:#fff}.tag.mod{background:var(--ok);color:#fff}
 /* modal */
-#modal{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;z-index:50}
-#modal .card h2{margin-bottom:6px;text-align:center}
-.emo{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.emo button{background:var(--bg3);border-radius:6px;font-size:20px;padding:5px 8px}.emo button.on{background:var(--acc)}
-.row{display:flex;gap:8px}.row .btn{flex:1}.btn.gray{background:var(--bg3)}
-#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#111214;padding:10px 16px;border-radius:8px;z-index:60;opacity:0;transition:.25s;pointer-events:none}
-#toast.show{opacity:1}
-.dev{position:fixed;inset:0;background:#000c;z-index:40;display:flex;align-items:center;justify-content:center}
-.devbox{background:var(--bg1);width:min(760px,96vw);height:min(640px,92vh);border-radius:12px;display:flex;flex-direction:column;overflow:hidden;border:1px solid #fbbf2455}
+#modal{position:fixed;inset:0;background:#000b;display:flex;align-items:center;justify-content:center;z-index:50}
+.mcard{background:#18181b;border:1px solid var(--line);border-radius:12px;width:min(460px,94vw);max-height:92vh;overflow-y:auto;padding:24px;position:relative}
+.mcard h2{text-align:center;font-size:24px;margin-bottom:8px}.mcard p.sub{text-align:center;color:var(--mut);margin-bottom:18px;font-size:15px}
+.mx{position:absolute;right:14px;top:12px;color:var(--mut);font-size:22px}.mx:hover{color:#fff}
+.opt{display:flex;align-items:center;gap:12px;width:100%;background:#1f1f24;border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-bottom:8px;font-weight:600;text-align:left}
+.opt:hover{background:#26262c}.opt .e{font-size:22px}.opt .sp{flex:1}.opt .ar{color:var(--mut)}
+.mfoot{display:flex;justify-content:space-between;align-items:center;margin-top:20px}
+.upl{width:84px;height:84px;border-radius:50%;border:2px dashed var(--mut);margin:6px auto 16px;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:11px;font-weight:700;color:var(--mut);cursor:pointer;position:relative;background-size:cover;background-position:center}
+.upl .plus{position:absolute;right:-2px;top:-2px;width:24px;height:24px;border-radius:50%;background:var(--acc);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{width:32px;height:32px;border-radius:50%;border:2px solid transparent}.chips button.on{border-color:#fff}
+/* popout */
+#pop{position:fixed;z-index:45;width:340px;background:#141417;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 10px 40px #000c}
+#pop .bn{height:72px}
+#pop .pa{margin:-40px 0 0 16px;border:6px solid #141417;border-radius:50%;width:92px;height:92px}
+#pop .pb{padding:8px 16px 16px}
+#pop h3{font-size:20px}#pop .hn{color:var(--mut);font-size:14px;margin-bottom:10px}
+.pbox{background:#1c1c20;border:1px solid var(--line);border-radius:8px;padding:6px;margin-top:10px}
+.pbox .it{display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:6px;cursor:pointer;font-size:14px;color:#cfd1d5}
+.pbox .it:hover{background:var(--hover);color:#fff}.pbox .it .sp{flex:1}
+.pbox hr{border:0;border-top:1px solid var(--line);margin:4px 6px}
+.pbio{font-size:13px;color:#cfd1d5;margin:8px 0;white-space:pre-wrap}.plab{font-size:12px;font-weight:700;color:var(--mut);margin-top:10px}
+/* profile editor */
+#prof{position:fixed;inset:0;background:var(--main);z-index:55;display:flex}
+#prof .pl{width:340px;background:var(--side);border-right:1px solid var(--line);overflow-y:auto;padding:16px}
+#prof .pl h3{font-size:18px;margin-bottom:12px}
+#prof .pr{flex:1;overflow-y:auto;display:flex;justify-content:center;padding:40px 20px}
+.pcard{width:380px;background:#141417;border:1px solid var(--line);border-radius:14px;overflow:hidden;height:max-content}
+.pcard .bn{height:110px}.pcard .pa{margin:-55px 0 0 20px;border:7px solid #141417;width:120px;height:120px;border-radius:50%}
+.pcard .pb{padding:10px 22px 22px}.pcard h2{font-size:24px}
+.boxed{background:#1a1a1e;border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:12px}
+.boxed .row2{display:flex;gap:8px}
+.tile{flex:1;height:80px;border-radius:10px;background:#1f1f24;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;background-size:cover;background-position:center;font-size:22px;color:var(--mut)}
+.tile:hover{border-color:var(--acc)}
+#profX{position:fixed;right:18px;top:14px;z-index:56;width:36px;height:36px;border-radius:50%;border:2px solid var(--mut);color:var(--mut);font-size:16px}
+/* dev */
+.dev{position:fixed;inset:0;background:#000c;z-index:58;display:flex;align-items:center;justify-content:center}
+.devbox{background:#141417;width:min(780px,96vw);height:min(660px,92vh);border-radius:12px;display:flex;flex-direction:column;overflow:hidden;border:1px solid #fbbf2455}
 .devhd{padding:14px 18px;display:flex;align-items:center;gap:10px;background:linear-gradient(90deg,#f59e0b33,transparent)}.devhd h2{color:#fbbf24;flex:1}
-.devhd button{background:none;color:var(--mut);font-size:20px}
-.devtabs{display:flex;gap:6px;padding:8px 14px;overflow-x:auto}.devtabs button{background:var(--bg3);color:var(--mut);padding:6px 12px;border-radius:99px;font-weight:700;font-size:13px;white-space:nowrap}
+.devhd button{color:var(--mut);font-size:20px}
+.devtabs{display:flex;gap:6px;padding:8px 14px;overflow-x:auto}.devtabs button{background:#1f1f24;color:var(--mut);padding:6px 12px;border-radius:99px;font-weight:700;font-size:13px;white-space:nowrap}
 .devtabs button.on{background:#fbbf24;color:#000}
 .devbody{flex:1;overflow-y:auto;padding:10px 16px 16px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}.stat{background:#0005;border-radius:10px;padding:10px;text-align:center}.stat b{display:block;font-size:22px;color:#fbbf24}.stat span{font-size:11px;color:var(--mut);text-transform:uppercase}
-.drow{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;flex-wrap:wrap}.drow:hover{background:var(--bg3)}.drow .nm{flex:1;min-width:120px}
-.chip{background:var(--bg3);color:var(--tx);padding:4px 9px;border-radius:99px;font-size:12px;font-weight:700}.chip.r{background:#f23f4333;color:#ff8a8c}.chip.y{background:#fbbf2433;color:#fbbf24}.chip.g{background:#23a55a33;color:#5be38d}
-.tag{font-size:10px;font-weight:800;padding:1px 6px;border-radius:4px;background:#fbbf24;color:#000;margin-left:4px}
-#maint{position:fixed;inset:0;background:var(--bg0);z-index:45;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:20px}
-.gbtn{background:#fff;color:#222;display:flex;align-items:center;justify-content:center;gap:8px}
-#empty{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--mut);text-align:center;padding:20px}
-@media(max-width:820px){
- #members{display:none}#menuBtn{display:block}
- #servers,#side{position:fixed;top:0;bottom:0;z-index:30;transition:transform .2s}
- #servers{left:0}#side{left:72px}
- #app.closed #servers,#app.closed #side{transform:translateX(-320px)}
- #app.membersOpen #members{display:block;position:fixed;right:0;top:0;bottom:0;z-index:30}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}.stat{background:#0007;border-radius:10px;padding:10px;text-align:center}.stat b{display:block;font-size:22px;color:#fbbf24}.stat span{font-size:11px;color:var(--mut);text-transform:uppercase}
+.drow{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;flex-wrap:wrap}.drow:hover{background:var(--hover)}.drow .nm{flex:1;min-width:120px}
+.chip{background:#26262c;color:var(--tx);padding:4px 9px;border-radius:99px;font-size:12px;font-weight:700}.chip.r{background:#f23f4333;color:#ff8a8c}.chip.y{background:#fbbf2433;color:#fbbf24}.chip.g{background:#23a55a33;color:#5be38d}
+#maint{position:fixed;inset:0;background:var(--main);z-index:70;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:20px}
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#202024;border:1px solid var(--line);padding:10px 16px;border-radius:8px;z-index:90;opacity:0;transition:.25s;pointer-events:none}
+#toast.show{opacity:1}
+#lightbox{position:fixed;inset:0;background:#000e;z-index:85;display:flex;align-items:center;justify-content:center;cursor:zoom-out}#lightbox img{max-width:92vw;max-height:92vh;border-radius:8px}
+@media(max-width:900px){#right{display:none}#right.show{display:block;position:fixed;right:0;top:52px;bottom:0;background:var(--side);z-index:30;width:280px}#top input.srch{width:130px}}
+@media(max-width:700px){
+ #menuBtn{display:block}
+ #rail,#side{position:fixed;top:0;bottom:0;z-index:35;transition:transform .2s}
+ #rail{left:0}#side{left:72px;width:calc(100vw - 72px);max-width:320px}
+ #app.closed #rail,#app.closed #side{transform:translateX(-420px)}
+ #top input.srch{display:none}#top .tab:not(.on):not(.add){display:none}
+ #prof{flex-direction:column}#prof .pl{width:100%;border:0}#prof .pr{display:none}
 }
 </style>
 </head>
 <body>
+<!-- LOGIN -->
 <div id="login">
- <div class="card">
-  <h1>Vítej! 👋</h1><p id="lsub">Přihlas se a pokecej s kámoši</p>
-  <div id="nameWrap" class="hidden"><label>Přezdívka</label><input id="lname" maxlength="24" placeholder="Jak ti máme říkat?"></div>
-  <label>E-mail</label><input id="lemail" type="email" autocomplete="email">
-  <label>Heslo</label><input id="lpass" type="password" autocomplete="current-password">
+ <div class="lcard">
+  <h1 id="lt">Vítej zpátky!</h1><p class="sub" id="lsub">Moc rádi tě znovu vidíme!</p>
+  <div id="regWrap" class="hidden">
+   <label class="l">Zobrazované jméno</label><input id="lname" maxlength="32" placeholder="Jak tě uvidí ostatní">
+   <label class="l">Uživatelské jméno</label><input id="luser" maxlength="24" placeholder="jen malá písmena, čísla, _ a .">
+  </div>
+  <label class="l">E-mail</label><input id="lemail" type="email" autocomplete="email">
+  <label class="l">Heslo</label><input id="lpass" type="password" autocomplete="current-password">
   <button class="btn" id="lgo">Přihlásit se</button>
-  <div class="err" id="lerr"></div>
   <button class="btn gbtn" id="lgoogle" style="margin-top:10px">👑 Vlastník: přihlásit přes Google</button>
-  <button class="link" id="lswitch">Nemáš účet? Zaregistruj se</button>
+  <div class="err" id="lerr"></div>
+  <div style="margin-top:6px;font-size:14px;color:var(--mut)"><span id="lq">Potřebuješ účet?</span> <button class="link" id="lswitch">Zaregistruj se</button></div>
  </div>
 </div>
 
 <div id="app" class="hidden closed">
- <nav id="servers"></nav>
+ <nav id="rail"></nav>
  <aside id="side">
-  <div id="srvName"><span id="srvTitle">Server</span><span><button id="inviteBtn" title="Pozvat">👥</button><button id="srvSet" title="Nastavení">⚙️</button></span></div>
-  <div id="chans"></div>
-  <div id="me"><div class="av" id="meAv"></div><span class="nm" id="meName"></span><button id="profBtn" title="Profil">✏️</button><button id="outBtn" title="Odhlásit">🚪</button></div>
+  <div id="sideHead"></div>
+  <div id="sideBody"></div>
+  <div id="up">
+   <div class="who" id="upWho"></div>
+   <button class="ub" id="micBtn" title="Ztlumit"></button>
+   <button class="ub" id="hpBtn" title="Ohluchnout"></button>
+   <button class="ub" id="setBtn" title="Uživatelské nastavení"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  </div>
  </aside>
  <main id="main">
-  <div id="top"><button id="menuBtn">☰</button><span id="chTitle"># </span><span class="sp"></span><button id="devBtn" class="hidden" title="Dev menu" style="color:#fbbf24">🛠️</button><button id="memBtn" title="Členové">👥</button></div>
-  <div id="empty" class="hidden"><div style="font-size:56px">💬</div><h2 style="color:var(--tx)">Zatím nejsi na žádném serveru</h2><p>Vytvoř si vlastní, nebo se připoj kódem od kámoše.</p><button class="btn" style="width:auto" id="emptyAdd">➕ Vytvořit / připojit</button></div>
-  <div id="msgs"></div>
-  <div id="typing"></div>
-  <div id="composer"><form id="form"><textarea id="inp" rows="1" maxlength="2000" placeholder="Napiš zprávu"></textarea><button type="submit">➤</button></form></div>
+  <div id="top"></div>
+  <div id="content">
+   <div id="center">
+    <div id="msgs"></div>
+    <div id="typing"></div>
+    <div id="composer"><div id="preview"></div><form id="form"><button type="button" class="cb" id="attBtn" title="Nahrát obrázek"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg></button><textarea id="inp" rows="1" maxlength="2000" placeholder="Zpráva"></textarea><button type="submit" class="cb" title="Odeslat"><svg class="ic" viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg></button></form><input type="file" id="attFile" accept="image/*" class="hidden"></div>
+   </div>
+   <aside id="right"></aside>
+  </div>
  </main>
- <aside id="members"></aside>
 </div>
 
+<div id="pop" class="hidden"></div>
+<div id="prof" class="hidden"></div>
 <div id="dev" class="dev hidden"><div class="devbox"><div class="devhd"><span style="font-size:24px">🛠️</span><h2>Dev menu</h2><span id="devRole" class="chip y"></span><button id="devX">✕</button></div><div class="devtabs" id="devTabs"></div><div class="devbody" id="devBody"></div></div></div>
-<div id="maint" class="hidden"><div style="font-size:60px">🛠️</div><h2>Probíhá údržba</h2><p style="color:var(--mut)" id="maintMsg"></p><button class="btn" style="width:auto" id="maintOut">Odhlásit se</button></div>
-<div id="modal" class="hidden"><div class="card" id="mcard"></div></div>
+<div id="maint" class="hidden"><div style="font-size:60px">🛠️</div><h2>Probíhá údržba</h2><p style="color:var(--mut)" id="maintMsg"></p><button class="btn sm" id="maintOut">Odhlásit se</button></div>
+<div id="modal" class="hidden"><div class="mcard" id="mcard"></div></div>
+<div id="lightbox" class="hidden"><img id="lbImg" alt=""></div>
+<input type="file" id="pickImg" accept="image/*" class="hidden">
 <div id="toast"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, collection, doc, setDoc, addDoc, getDoc, updateDoc, deleteDoc, onSnapshot, query, where, arrayUnion, arrayRemove, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, addDoc, getDoc, getDocs, updateDoc, deleteDoc, onSnapshot, query, where, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 const firebaseConfig = {"apiKey": "AIzaSyBovG00qfDWUBcS9pJlS_FwOH4etF9Sv0Y", "authDomain": "flex-bubble.firebaseapp.com", "projectId": "flex-bubble", "storageBucket": "flex-bubble.firebasestorage.app", "messagingSenderId": "171220277752", "appId": "1:171220277752:web:d5d68647bf1759db58de0d"};
 const APP = 'flex-bubble-prod-v10';
@@ -147,81 +258,130 @@ const D = (n, id) => doc(db, 'artifacts', APP, 'public', 'data', n, id);
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const COLORS = ['#5865f2','#eb459e','#57f287','#fee75c','#ed4245','#f47b67','#3ba55c','#9b59b6','#e67e22','#1abc9c'];
-const EMOJI = ['💬','🎮','🔥','⚡','🐺','🚀','🎵','⛏️','🍕','👾','🌙','🌈','⚽','📚','😎','🐱'];
-const REACT = ['👍','😂','❤️','🔥','😮','😢'];
-const toast = t => { const e = $('toast'); e.textContent = t; e.classList.add('show'); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove('show'), 2200); };
+const BANNERS = ['#5865f2','#eb459e','#3ba55c','#e67e22','#9b59b6','#1abc9c','#ed4245','#2b2d31','#b5b2a5','linear-gradient(135deg,#ff00cc,#66e0ff)','linear-gradient(135deg,#f7971e,#ffd200)','linear-gradient(135deg,#00c6ff,#0072ff)'];
+const REACT = ['👍','😂','❤️','🔥','😮','😢','💀','🎉'];
+const OWNER_EMAIL = 'mrwolfvrcz@gmail.com';
+const I = {
+  home: '<svg width="28" height="22" viewBox="0 0 28 22" fill="currentColor"><path d="M23.7 1.8A23 23 0 0 0 18 0l-.7 1.5a21 21 0 0 0-6.5 0L10 0a23 23 0 0 0-5.7 1.8C.7 7.2-.3 12.5.2 17.7A23 23 0 0 0 7.2 21l1.5-2.4a15 15 0 0 1-2.3-1.1l.6-.4a16.5 16.5 0 0 0 14 0l.6.4c-.7.4-1.5.8-2.3 1.1l1.5 2.4a23 23 0 0 0 7-3.3c.6-6-.9-11.2-4.1-15.9ZM9.4 14.5c-1.4 0-2.5-1.3-2.5-2.8s1.1-2.8 2.5-2.8 2.5 1.3 2.5 2.8-1.1 2.8-2.5 2.8Zm9.2 0c-1.4 0-2.5-1.3-2.5-2.8s1.1-2.8 2.5-2.8 2.5 1.3 2.5 2.8-1.1 2.8-2.5 2.8Z"/></svg>',
+  friends: '<svg class="ic" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.1a4 4 0 0 1 0 7.8M21 21v-2a4 4 0 0 0-3-3.9"/></svg>',
+  addUser: '<svg class="ic" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M19 8v6M16 11h6"/></svg>',
+  gear: '<svg class="ic" viewBox="0 0 24 24" style="width:16px;height:16px"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>',
+  mic: '<svg class="ic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1M12 18v4"/></svg>',
+  micOff: '<svg class="ic" viewBox="0 0 24 24"><path d="M2 2l20 20M9 9v2a3 3 0 0 0 5.1 2.1M15 9.3V5a3 3 0 0 0-5.9-.6M17 16.9A7 7 0 0 1 5 11v-1M19 10v1a7 7 0 0 1-.1 1.3M12 18v4"/></svg>',
+  hp: '<svg class="ic" viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg>',
+  hpOff: '<svg class="ic" viewBox="0 0 24 24"><path d="M2 2l20 20M3 18v-6a9 9 0 0 1 2.6-6.4M8.3 3.8A9 9 0 0 1 21 12v6"/><path d="M3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg>',
+  speaker: '<svg class="ic" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M11 5 6 9H2v6h4l5 4zM15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>',
+  compass: '<svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m16.2 7.8-2.1 6.3-6.3 2.1 2.1-6.3z"/></svg>',
+  members: '<svg class="ic" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.1a4 4 0 0 1 0 7.8M21 21v-2a4 4 0 0 0-3-3.9"/></svg>',
+  tools: '<svg class="ic" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg>',
+  chat: '<svg class="ic" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+  check: '<svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>',
+  x: '<svg class="ic" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+  chev: '<svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="m6 9 6 6 6-6"/></svg>',
+  right: '<svg class="ic" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="m9 18 6-6-6-6"/></svg>'
+};
+const toast = t => { const e = $('toast'); e.textContent = t; e.classList.add('show'); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove('show'), 2400); };
 const fail = e => { console.error(e); toast('❌ Nepovedlo se: ' + (e.code || e.message || e)); };
 
-let me = null, myProfile = null, users = {}, servers = [], curSrv = null, channels = [], curCh = null;
-let unsub = { srv: null, ch: null, msg: null, users: null, typing: null };
-let regMode = false;
+let me = null, users = {}, servers = [], curSrv = null, channels = [], curCh = null, friends = [], dms = [];
+let view = 'home', homeTab = 'online', curDm = null;
+let devs = {}, bans = {}, settings = {};
+let unsub = {};
+let regMode = false, micOff = false, hpOff = false;
+let pendingImg = null;
+
+/* ---------- helpers ---------- */
+const isOwner = () => !!(me && me.email === OWNER_EMAIL && me.emailVerified);
+const isDev = () => isOwner() || !!devs[me?.uid];
+const banUntil = uid => bans[uid] === -1 ? Infinity : (bans[uid] || 0);
+const isBanned = uid => banUntil(uid) > Date.now();
+const myP = () => users[me?.uid] || {};
+const nameOf = uid => users[uid]?.name || 'Neznámý';
+function status(uid) { const u = users[uid]; if (!u || Date.now() - (u.seen || 0) > 150000) return 'offline'; const s = u.status || 'online'; return s === 'invisible' ? 'offline' : s; }
+const STATUS_TX = { online: 'Online', idle: 'Nepřítomen', dnd: 'Nerušit', offline: 'Offline', invisible: 'Neviditelný' };
+function avatar(uid, size = 40, withSt = false, ring = 'var(--side)') {
+  const u = users[uid] || { name: '?', color: '#555' };
+  const bg = u.avatar ? `background-image:url(${u.avatar});` : `background-color:${u.color || '#5865f2'};`;
+  const st = withSt ? `<span class="st ${status(uid)}" style="width:${Math.max(10, size * .33)}px;height:${Math.max(10, size * .33)}px;border-color:${ring}"></span>` : '';
+  return `<div class="av" style="width:${size}px;height:${size}px;font-size:${size * .42}px;${bg}">${u.avatar ? '' : esc((u.name || '?')[0].toUpperCase())}${st}</div>`;
+}
+const bannerCss = u => (u?.banner || u?.color || '#5865f2');
+const pairId = (a, b) => [a, b].sort().join('_');
+const slug = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9_.]/g, '').slice(0, 24);
+const isImg = v => typeof v === 'string' && v.startsWith('data:');
+const srvIco = s => isImg(s.icon) ? `<img src="${s.icon}" alt="">` : esc(s.icon || initials(s.name));
+const initials = n => String(n || '?').split(/\s+/).map(w => w[0]).join('').slice(0, 4);
+function readImage(file, max, q = .82) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => { const img = new Image(); img.onload = () => { const k = Math.min(1, max / Math.max(img.width, img.height)); const c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', q)); }; img.onerror = rej; img.src = r.result; };
+    r.onerror = rej; r.readAsDataURL(file);
+  });
+}
+function pickImage(max) { return new Promise(res => { const f = $('pickImg'); f.value = ''; f.onchange = async () => { if (!f.files[0]) return res(null); try { res(await readImage(f.files[0], max)); } catch { toast('❌ Obrázek nejde načíst'); res(null); } }; f.click(); }); }
 
 /* ---------- LOGIN ---------- */
 $('lswitch').onclick = () => {
   regMode = !regMode;
-  $('nameWrap').classList.toggle('hidden', !regMode);
-  $('lgo').textContent = regMode ? 'Vytvořit účet' : 'Přihlásit se';
-  $('lsub').textContent = regMode ? 'Vytvoř si účet zdarma' : 'Přihlas se a pokecej s kámoši';
-  $('lswitch').textContent = regMode ? 'Už máš účet? Přihlas se' : 'Nemáš účet? Zaregistruj se';
+  $('regWrap').classList.toggle('hidden', !regMode);
+  $('lgo').textContent = regMode ? 'Pokračovat' : 'Přihlásit se';
+  $('lt').textContent = regMode ? 'Vytvořit účet' : 'Vítej zpátky!';
+  $('lsub').textContent = regMode ? 'Pár údajů a můžeš začít' : 'Moc rádi tě znovu vidíme!';
+  $('lq').textContent = regMode ? 'Už máš účet?' : 'Potřebuješ účet?';
+  $('lswitch').textContent = regMode ? 'Přihlas se' : 'Zaregistruj se';
   $('lerr').textContent = '';
 };
-const authErr = c => ({'auth/invalid-credential':'Špatný e-mail nebo heslo','auth/wrong-password':'Špatné heslo','auth/user-not-found':'Účet neexistuje','auth/email-already-in-use':'Tenhle e-mail už má účet','auth/weak-password':'Heslo musí mít aspoň 6 znaků','auth/invalid-email':'Neplatný e-mail','auth/too-many-requests':'Moc pokusů, zkus to za chvíli'}[c] || c);
+const authErr = c => ({'auth/invalid-credential':'Špatný e-mail nebo heslo','auth/wrong-password':'Špatné heslo','auth/user-not-found':'Účet neexistuje','auth/email-already-in-use':'Tenhle e-mail už má účet','auth/weak-password':'Heslo musí mít aspoň 6 znaků','auth/invalid-email':'Neplatný e-mail','auth/too-many-requests':'Moc pokusů, zkus to za chvíli','auth/popup-closed-by-user':'Okno se zavřelo'}[c] || c);
+async function handleFree(h, uid) { if (h.length < 2) return false; const s = await getDoc(D('dc_names', h)); return !s.exists() || s.data().uid === uid; }
 async function doLogin() {
-  const em = $('lemail').value.trim(), pw = $('lpass').value, nm = $('lname').value.trim();
+  const em = $('lemail').value.trim(), pw = $('lpass').value;
   $('lerr').textContent = '';
-  if (regMode && nm.length < 2) { $('lerr').textContent = 'Přezdívka musí mít aspoň 2 znaky'; return; }
   try {
     if (regMode) {
+      const nm = $('lname').value.trim(), h = slug($('luser').value);
+      if (nm.length < 2) { $('lerr').textContent = 'Jméno musí mít aspoň 2 znaky'; return; }
+      if (h.length < 2) { $('lerr').textContent = 'Uživatelské jméno musí mít aspoň 2 znaky'; return; }
       const cr = await createUserWithEmailAndPassword(auth, em, pw);
-      await setDoc(D('dc_users', cr.user.uid), { name: nm, color: COLORS[Math.floor(Math.random()*COLORS.length)], seen: Date.now() });
+      if (!(await handleFree(h, cr.user.uid))) { $('lerr').textContent = 'Uživatelské jméno je zabrané, dostaneš jiné (změníš v profilu)'; }
+      await setupUser(cr.user, nm, h);
     } else await signInWithEmailAndPassword(auth, em, pw);
   } catch (e) { $('lerr').textContent = authErr(e.code); }
 }
 $('lgo').onclick = doLogin;
 $('lpass').onkeydown = e => { if (e.key === 'Enter') doLogin(); };
-$('outBtn').onclick = () => signOut(auth);
-$('maintOut').onclick = () => signOut(auth);
 $('lgoogle').onclick = async () => { $('lerr').textContent = ''; try { await signInWithPopup(auth, new GoogleAuthProvider()); } catch (e) { $('lerr').textContent = authErr(e.code); } };
-const OWNER_EMAIL = 'mrwolfvrcz@gmail.com';
-const isOwner = () => !!(me && me.email === OWNER_EMAIL && me.emailVerified);
-let devs = {}, bans = {}, settings = {};
-const isDev = () => isOwner() || !!devs[me?.uid];
-const banUntil = uid => bans[uid] === -1 ? Infinity : (bans[uid] || 0);
-const isBanned = uid => banUntil(uid) > Date.now();
+$('maintOut').onclick = () => signOut(auth);
+
+async function setupUser(u, nm, want) {
+  const ref = D('dc_users', u.uid), s = await getDoc(ref);
+  const cur = s.exists() ? s.data() : {};
+  const name = cur.name || nm || (u.email === OWNER_EMAIL ? 'Wolfe' : (u.displayName || (u.email || 'uživatel').split('@')[0])).slice(0, 32);
+  let h = cur.handle;
+  if (!h) {
+    h = slug(want || name) || 'user';
+    let tries = 0; while (!(await handleFree(h, u.uid)) && tries < 8) { h = slug(want || name).slice(0, 18) + Math.floor(Math.random() * 9000 + 1000); tries++; }
+    await setDoc(D('dc_names', h), { uid: u.uid });
+  }
+  await setDoc(ref, { name, handle: h, color: cur.color || COLORS[Math.floor(Math.random() * COLORS.length)], seen: Date.now(), since: cur.since || Date.now(), status: cur.status || 'online' }, { merge: true });
+}
 
 onAuthStateChanged(auth, async u => {
-  Object.values(unsub).forEach(f => f && f());
-  if (!u || u.isAnonymous) { me = null; $('login').classList.remove('hidden'); $('app').classList.add('hidden'); return; }
+  Object.values(unsub).forEach(f => f && f()); unsub = {};
+  if (!u || u.isAnonymous) { me = null; $('login').classList.remove('hidden'); $('app').classList.add('hidden'); $('maint').classList.add('hidden'); return; }
   me = u;
-  const snap = await getDoc(D('dc_users', u.uid));
-  if (!snap.exists()) {
-    const nm = (u.email === OWNER_EMAIL ? 'Wolfe' : (u.displayName || (u.email || 'uživatel').split('@')[0])).slice(0, 24);
-    await setDoc(D('dc_users', u.uid), { name: nm, color: COLORS[Math.floor(Math.random()*COLORS.length)], seen: Date.now() });
-  }
+  try { await setupUser(u); } catch (e) { fail(e); }
   $('login').classList.add('hidden'); $('app').classList.remove('hidden');
   startApp();
 });
 
 /* ---------- PRESENCE ---------- */
-const online = u => u && Date.now() - (u.seen || 0) < 120000;
-setInterval(() => { if (me) updateDoc(D('dc_users', me.uid), { seen: Date.now() }).catch(()=>{}); }, 60000);
-document.addEventListener('visibilitychange', () => { if (me && !document.hidden) updateDoc(D('dc_users', me.uid), { seen: Date.now() }).catch(()=>{}); });
+const ping = () => { if (me) updateDoc(D('dc_users', me.uid), { seen: Date.now() }).catch(() => {}); };
+setInterval(ping, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) ping(); });
 
-function avatar(uid, size) {
-  const u = users[uid] || { name: '?', color: '#555' };
-  const s = size ? `width:${size}px;height:${size}px;` : '';
-  return `<div class="av" style="${s}background:${esc(u.color)}">${esc((u.name||'?')[0].toUpperCase())}</div>`;
-}
-
-/* ---------- APP ---------- */
+/* ---------- START ---------- */
 function startApp() {
-  updateDoc(D('dc_users', me.uid), { seen: Date.now() }).catch(()=>{});
-  unsub.users = onSnapshot(C('dc_users'), s => {
-    users = {}; s.forEach(d => users[d.id] = d.data());
-    myProfile = users[me.uid];
-    if (myProfile) { $('meName').textContent = myProfile.name; $('meAv').outerHTML = avatar(me.uid).replace('class="av"', 'class="av" id="meAv"'); }
-    renderMembers(); renderMsgs();
-  });
+  unsub.users = onSnapshot(C('dc_users'), s => { users = {}; s.forEach(d => users[d.id] = d.data()); renderAll(); });
   unsub.g = onSnapshot(C('dc_globals'), s => {
     devs = {}; bans = {}; settings = {};
     s.forEach(d => { if (d.id === 'devs') devs = d.data(); if (d.id === 'bans') bans = d.data(); if (d.id === 'settings') settings = d.data(); });
@@ -229,285 +389,634 @@ function startApp() {
   });
   unsub.srv = onSnapshot(query(C('dc_servers'), where('members', 'array-contains', me.uid)), s => {
     servers = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (a.created || 0) - (b.created || 0));
-    if (curSrv && !servers.find(x => x.id === curSrv.id)) curSrv = null;
-    if (curSrv) curSrv = servers.find(x => x.id === curSrv.id);
-    const want = localStorage.getItem('dc_srv');
-    if (!curSrv && servers.length) selectServer((servers.find(x => x.id === want) || servers[0]).id);
-    renderServers();
-    if (!servers.length) showEmpty(true);
+    if (view !== 'home') { const n = servers.find(x => x.id === view); if (!n) goHome(); else { curSrv = n; } }
+    renderRail(); if (view !== 'home') { renderSide(); renderTop(); renderRight(); }
   }, fail);
+  unsub.fr = onSnapshot(query(C('dc_friends'), where('users', 'array-contains', me.uid)), s => {
+    friends = s.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderRail(); if (view === 'home') { renderSide(); if (!curDm) { renderTop(); renderHomeMain(); } }
+  });
+  unsub.dm = onSnapshot(query(C('dc_channels'), where('members', 'array-contains', me.uid)), s => {
+    dms = s.docs.map(d => ({ id: d.id, ...d.data() })).filter(c => c.dm).sort((a, b) => (b.last || b.created || 0) - (a.last || a.created || 0));
+    if (view === 'home') renderSide();
+  });
+  const want = localStorage.getItem('dc_view');
   const hash = location.hash.match(/join=([\w-]+)/);
   if (hash) { history.replaceState(null, '', location.pathname); joinServer(hash[1]); }
+  else if (want && want !== 'home') { setTimeout(() => { if (servers.find(x => x.id === want)) selectServer(want); else goHome(); }, 700); }
+  goHome(true);
+}
+function renderAll() {
+  renderRail(); renderSide(); renderUp(); renderTop(); renderRight();
+  if (view === 'home' && !curDm) renderHomeMain(); else renderMsgs();
 }
 
-function showEmpty(on) {
-  $('empty').classList.toggle('hidden', !on);
-  ['msgs', 'composer', 'typing'].forEach(i => $(i).classList.toggle('hidden', on));
-  if (on) { $('srvTitle').textContent = 'Žádný server'; $('chans').innerHTML = ''; $('members').innerHTML = ''; $('chTitle').textContent = ''; $('app').classList.remove('closed'); }
+/* ---------- RAIL ---------- */
+function renderRail() {
+  const pend = friends.filter(f => f.status === 'pending' && f.from !== me.uid).length;
+  let h = `<button class="rb home ${view === 'home' ? 'on' : ''}" id="rHome" title="Přímé zprávy"><span class="pill"></span>${I.home}${pend ? `<span class="badge">${pend}</span>` : ''}</button><div class="rsep"></div>`;
+  for (const s of servers) h += `<button class="rb ${isImg(s.icon) ? 'img' : ''} ${view === s.id ? 'on' : ''}" data-s="${s.id}" title="${esc(s.name)}" style="${isImg(s.icon) || !s.icon ? '' : 'font-size:22px'}"><span class="pill"></span>${srvIco(s)}</button>`;
+  h += `<button class="rb green" id="rAdd" title="Přidat server" style="font-size:24px">＋</button><button class="rb green" id="rExp" title="Připojit se k serveru">${I.compass}</button>`;
+  $('rail').innerHTML = h;
+  $('rHome').onclick = () => goHome();
+  $('rAdd').onclick = createServerWizard;
+  $('rExp').onclick = joinModal;
+  $('rail').querySelectorAll('[data-s]').forEach(b => b.onclick = () => selectServer(b.dataset.s));
 }
 
-function renderServers() {
-  $('servers').innerHTML = servers.map(s => `<button class="srv ${curSrv && s.id === curSrv.id ? 'on' : ''}" data-id="${s.id}" title="${esc(s.name)}">${esc(s.icon || '💬')}</button>`).join('')
-    + (servers.length ? '<div class="sep"></div>' : '') + '<button class="srv add" id="addSrv" title="Přidat server">＋</button>';
-  $('servers').querySelectorAll('.srv[data-id]').forEach(b => b.onclick = () => selectServer(b.dataset.id));
-  $('addSrv').onclick = addServerModal;
-}
-
-function selectServer(id) {
-  curSrv = servers.find(x => x.id === id); if (!curSrv) return;
-  localStorage.setItem('dc_srv', id); showEmpty(false);
-  $('srvTitle').textContent = curSrv.name; renderServers(); renderMembers();
-  unsub.ch && unsub.ch();
-  curCh = null;
-  unsub.ch = onSnapshot(query(C('dc_channels'), where('srv', '==', id)), s => {
-    channels = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (a.created || 0) - (b.created || 0));
-    renderChannels();
-    if (!curCh || !channels.find(c => c.id === curCh.id)) {
-      const want = localStorage.getItem('dc_ch_' + id);
-      if (channels.length) selectChannel((channels.find(c => c.id === want) || channels[0]).id);
-      else { curCh = null; $('msgs').innerHTML = ''; $('chTitle').textContent = ''; }
+/* ---------- SIDE ---------- */
+function renderSide() {
+  if (view === 'home') {
+    $('sideHead').innerHTML = `<button class="findbtn" id="findBtn">Najít nebo začít konverzaci</button>`;
+    $('findBtn').onclick = newDmModal;
+    const pend = friends.filter(f => f.status === 'pending' && f.from !== me.uid).length;
+    let h = `<div class="nav ${!curDm ? 'on' : ''}" id="navFr">${I.friends}<span class="sp">Přátelé</span>${pend ? `<span class="cnt">${pend}</span>` : ''}</div>`;
+    h += `<div class="sec"><span>Přímé zprávy</span><button id="newDm" title="Vytvořit konverzaci">＋</button></div>`;
+    for (const c of dms) {
+      const o = c.members.find(x => x !== me.uid) || me.uid;
+      h += `<div class="dm ${curDm && curDm.id === c.id ? 'on' : ''}" data-d="${c.id}">${avatar(o, 32, true)}<div class="n"><b>${esc(nameOf(o))}</b>${users[o]?.custom ? `<small>${esc(users[o].custom)}</small>` : ''}</div><button class="x" data-hide="${c.id}" title="Zavřít">✕</button></div>`;
     }
-  }, fail);
+    if (!dms.length) h += `<p style="color:var(--dim);font-size:13px;padding:8px">Zatím žádné zprávy. Přidej si přátele a napiš jim 👋</p>`;
+    $('sideBody').innerHTML = h;
+    $('navFr').onclick = () => { curDm = null; closeMobile(); stopChannel(); renderSide(); renderTop(); renderHomeMain(); renderRight(); };
+    $('newDm').onclick = newDmModal;
+    $('sideBody').querySelectorAll('[data-d]').forEach(e => e.onclick = ev => { if (ev.target.dataset.hide) return; openDm(e.dataset.d); });
+    $('sideBody').querySelectorAll('[data-hide]').forEach(b => b.onclick = () => { if (curDm?.id === b.dataset.hide) { curDm = null; stopChannel(); renderTop(); renderHomeMain(); } dms = dms.filter(x => x.id !== b.dataset.hide); renderSide(); });
+    return;
+  }
+  if (!curSrv) return;
+  $('sideHead').innerHTML = `<div class="t" id="srvMenu">${esc(curSrv.name)} ${I.chev}</div><button class="hb" id="invBtn" title="Pozvat lidi">${I.addUser}</button>`;
+  $('srvMenu').onclick = srvMenu; $('invBtn').onclick = inviteModal;
+  const can = canManage();
+  const text = channels.filter(c => c.type !== 'voice'), voice = channels.filter(c => c.type === 'voice');
+  const col = JSON.parse(localStorage.getItem('dc_col') || '{}');
+  let h = '';
+  const catH = (k, label) => `<div class="cat" data-cat="${k}">${I.chev}<span class="sp">${label}</span>${can ? `<button data-addch="${k}" title="Vytvořit kanál">＋</button>` : ''}</div>`;
+  h += catH('text', 'Textové kanály');
+  if (!col.text) for (const c of text) h += `<div class="ch ${curCh && curCh.id === c.id ? 'on' : ''}" data-c="${c.id}"><span class="h">#</span><span class="n">${esc(c.name)}</span><span class="ia"><span data-inv="1" title="Pozvat">${I.addUser.replace('class="ic"', 'class="ic" style="width:16px;height:16px"')}</span>${can ? `<span data-edit="${c.id}" title="Upravit kanál">${I.gear}</span>` : ''}</span></div>`;
+  h += catH('voice', 'Hlasové kanály');
+  if (!col.voice) for (const c of voice) h += `<div class="ch" data-v="${c.id}"><span class="h">${I.speaker}</span><span class="n">${esc(c.name)}</span>${can ? `<span class="ia"><span data-edit="${c.id}">${I.gear}</span></span>` : ''}</div>`;
+  $('sideBody').innerHTML = h;
+  $('sideBody').querySelectorAll('[data-cat]').forEach(e => e.onclick = ev => { if (ev.target.closest('[data-addch]')) return; col[e.dataset.cat] = !col[e.dataset.cat]; localStorage.setItem('dc_col', JSON.stringify(col)); renderSide(); });
+  $('sideBody').querySelectorAll('[data-addch]').forEach(b => b.onclick = () => addChannelModal(b.dataset.addch));
+  $('sideBody').querySelectorAll('[data-c]').forEach(e => e.onclick = ev => { if (ev.target.closest('[data-inv]')) return inviteModal(); if (ev.target.closest('[data-edit]')) return editChannelModal(ev.target.closest('[data-edit]').dataset.edit); selectChannel(e.dataset.c); closeMobile(); });
+  $('sideBody').querySelectorAll('[data-v]').forEach(e => e.onclick = ev => { if (ev.target.closest('[data-edit]')) return editChannelModal(ev.target.closest('[data-edit]').dataset.edit); toast('🔊 Hlasové kanály přijdou v další verzi'); });
 }
 
-function renderChannels() {
-  const owner = curSrv && curSrv.owner === me.uid;
-  $('chans').innerHTML = `<div class="cat"><span>Textové kanály</span>${owner ? '<button id="addCh" title="Nový kanál">＋</button>' : ''}</div>`
-    + channels.map(c => `<div class="ch ${curCh && c.id === curCh.id ? 'on' : ''}" data-id="${c.id}"><span>#</span>${esc(c.name)}</div>`).join('');
-  $('chans').querySelectorAll('.ch').forEach(e => e.onclick = () => { selectChannel(e.dataset.id); $('app').classList.add('closed'); });
-  if (owner) $('addCh').onclick = addChannelModal;
+/* ---------- USER PANEL ---------- */
+function renderUp() {
+  if (!me) return;
+  const p = myP(), st = status(me.uid);
+  $('upWho').innerHTML = `${avatar(me.uid, 34, true, '#1a1a1e')}<div class="n"><b>${esc(p.name || '')}</b><small>${esc(p.custom || STATUS_TX[p.status === 'invisible' ? 'invisible' : st])}</small></div>`;
+  $('micBtn').innerHTML = micOff ? I.micOff : I.mic; $('micBtn').classList.toggle('off', micOff);
+  $('hpBtn').innerHTML = hpOff ? I.hpOff : I.hp; $('hpBtn').classList.toggle('off', hpOff);
+}
+$('micBtn').onclick = () => { micOff = !micOff; renderUp(); };
+$('hpBtn').onclick = () => { hpOff = !hpOff; micOff = hpOff; renderUp(); };
+$('setBtn').onclick = () => openProfileEditor();
+$('upWho').onclick = e => { e.stopPropagation(); selfPop(); };
+
+function placePop(x, y) { const p = $('pop'); p.classList.remove('hidden'); const r = p.getBoundingClientRect(); p.style.left = Math.max(8, Math.min(x, innerWidth - r.width - 8)) + 'px'; p.style.top = Math.max(8, Math.min(y, innerHeight - r.height - 8)) + 'px'; }
+document.addEventListener('click', e => { if (!e.target.closest('#pop') && !e.target.closest('#upWho')) $('pop').classList.add('hidden'); });
+function selfPop() {
+  $('pop').style.width = '';
+  const p = myP(), st = p.status || 'online';
+  $('pop').innerHTML = `<div class="bn" style="background:${bannerCss(p)}"></div><div class="pa">${avatar(me.uid, 80, true, '#141417')}</div><div class="pb"><h3>${esc(p.name)}${roleTag(me.uid)}</h3><div class="hn">${esc(p.handle || '')}</div>${p.bio ? `<div class="pbio">${esc(p.bio)}</div>` : ''}
+   <div class="pbox"><div class="it" id="pEdit">✏️<span class="sp">Upravit profil</span></div><hr>
+   ${['online', 'idle', 'dnd', 'invisible'].map(s => `<div class="it" data-st="${s}"><span class="st ${s === 'invisible' ? 'offline' : s}" style="position:static;width:10px;height:10px;border:0"></span><span class="sp">${STATUS_TX[s]}</span>${st === s ? '✓' : ''}</div>`).join('')}
+   <hr><div class="it" id="pCustom">💬<span class="sp">${p.custom ? 'Upravit vlastní status' : 'Nastavit vlastní status'}</span></div><div class="it" id="pCopy">🆔<span class="sp">Kopírovat uživatelské jméno</span></div></div>
+   <div class="pbox"><div class="it" id="pSwitch">👤<span class="sp">Přepnout účty</span>${I.right}</div></div></div>`;
+  const r = $('up').getBoundingClientRect(); placePop(r.left, r.top - 10 - 470);
+  $('pEdit').onclick = () => { $('pop').classList.add('hidden'); openProfileEditor(); };
+  $('pop').querySelectorAll('[data-st]').forEach(e => e.onclick = () => { updateDoc(D('dc_users', me.uid), { status: e.dataset.st, seen: Date.now() }).catch(fail); $('pop').classList.add('hidden'); });
+  $('pCustom').onclick = () => { $('pop').classList.add('hidden'); modal(`<h2>Vlastní status</h2><label class="l">Co děláš?</label><input id="cst" maxlength="60" value="${esc(p.custom || '')}" placeholder="Hraju Minecraft ⛏️"><div class="mfoot"><button class="link" id="cclr">Vymazat</button><button class="btn sm" id="cok">Uložit</button></div>`, () => {
+    $('cok').onclick = () => { updateDoc(D('dc_users', me.uid), { custom: $('cst').value.trim() }).catch(fail); closeModal(); };
+    $('cclr').onclick = () => { updateDoc(D('dc_users', me.uid), { custom: '' }).catch(fail); closeModal(); };
+  }); };
+  $('pCopy').onclick = () => { navigator.clipboard.writeText(p.handle || '').then(() => toast('📋 Zkopírováno')); };
+  $('pSwitch').onclick = () => { if (confirm('Odhlásit se a přepnout účet?')) signOut(auth); };
+}
+function userPop(uid, ev) {
+  $('pop').style.width = '';
+  const u = users[uid] || {};
+  const isF = friends.find(f => f.users.includes(uid) && f.status === 'ok');
+  $('pop').innerHTML = `<div class="bn" style="background:${bannerCss(u)}"></div><div class="pa">${avatar(uid, 80, true, '#141417')}</div><div class="pb"><h3>${esc(u.name)}${roleTag(uid)}</h3><div class="hn">${esc(u.handle || '')}${u.custom ? ' • ' + esc(u.custom) : ''}</div>
+   ${u.bio ? `<div class="plab">O mně</div><div class="pbio">${esc(u.bio)}</div>` : ''}<div class="plab">Členem od</div><div class="pbio">${u.since ? new Date(u.since).toLocaleDateString('cs-CZ') : '—'}</div>
+   ${uid !== me.uid ? `<div class="pbox"><div class="it" id="pMsg">💬<span class="sp">Poslat zprávu</span></div>${isF ? '' : `<div class="it" id="pAdd">➕<span class="sp">Přidat do přátel</span></div>`}</div>` : ''}</div>`;
+  placePop(ev.clientX + 10, ev.clientY - 60);
+  const m = $('pMsg'); if (m) m.onclick = () => { $('pop').classList.add('hidden'); startDm(uid); };
+  const a = $('pAdd'); if (a) a.onclick = () => { $('pop').classList.add('hidden'); sendFriendReq(u.handle); };
 }
 
-let msgs = [];
-function selectChannel(id) {
-  curCh = channels.find(c => c.id === id); if (!curCh) return;
-  localStorage.setItem('dc_ch_' + curSrv.id, id);
-  $('chTitle').textContent = '# ' + curCh.name; $('inp').placeholder = 'Napiš do #' + curCh.name;
-  renderChannels();
-  unsub.msg && unsub.msg(); unsub.typing && unsub.typing();
-  msgs = []; renderMsgs(true);
-  unsub.msg = onSnapshot(query(C('dc_messages'), where('ch', '==', id)), s => {
-    const atBottom = $('msgs').scrollHeight - $('msgs').scrollTop - $('msgs').clientHeight < 120;
-    msgs = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (a.t || 0) - (b.t || 0)).slice(-300);
-    renderMsgs(atBottom);
-  }, fail);
-  unsub.typing = onSnapshot(D('dc_typing', id), s => {
-    const d = s.exists() ? s.data() : {};
-    const who = Object.entries(d).filter(([u, t]) => u !== me.uid && Date.now() - t < 5000).map(([u]) => users[u]?.name).filter(Boolean);
-    $('typing').textContent = who.length ? `${who.join(', ')} ${who.length > 1 ? 'píšou' : 'píše'}…` : '';
+/* ---------- TOP BAR ---------- */
+function renderTop() {
+  let h = '<button class="tb" id="menuBtn">☰</button>';
+  if (view === 'home' && !curDm) {
+    const pend = friends.filter(f => f.status === 'pending' && f.from !== me.uid).length;
+    h += `<span class="tt">${I.friends} Přátelé</span><span style="color:var(--dim)">•</span>
+      <button class="tab ${homeTab === 'online' ? 'on' : ''}" data-t="online">Online</button>
+      <button class="tab ${homeTab === 'all' ? 'on' : ''}" data-t="all">Vše</button>
+      <button class="tab ${homeTab === 'pending' ? 'on' : ''}" data-t="pending">Nevyřízeno ${pend ? `<span class="cnt">${pend}</span>` : ''}</button>
+      <button class="tab add ${homeTab === 'add' ? 'on' : ''}" data-t="add">Přidat přítele</button><span class="sp"></span>`;
+  } else if (view === 'home' && curDm) {
+    const o = curDm.members.find(x => x !== me.uid) || me.uid;
+    h += `<span class="tt">${avatar(o, 26, true, 'var(--main)')} ${esc(nameOf(o))}</span><span class="sp"></span><input class="srch" id="srch" placeholder="Hledat">`;
+  } else if (curCh) {
+    h += `<span class="tt"><span style="color:var(--dim);font-size:22px">#</span> ${esc(curCh.name)}</span>${curCh.topic ? `<span style="color:var(--mut);font-size:13px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${esc(curCh.topic)}</span>` : ''}<span class="sp"></span><button class="tb ${showMembers ? 'on' : ''}" id="memBtn" title="Seznam členů">${I.members}</button><input class="srch" id="srch" placeholder="Vyhledat ${esc(curSrv?.name || '')}">`;
+  } else h += '<span class="sp"></span>';
+  if (isDev()) h += `<button class="tb" id="devBtn" title="Dev menu" style="color:#fbbf24">${I.tools}</button>`;
+  $('top').innerHTML = h;
+  $('menuBtn').onclick = () => $('app').classList.toggle('closed');
+  $('top').querySelectorAll('[data-t]').forEach(b => b.onclick = () => { homeTab = b.dataset.t; renderTop(); renderHomeMain(); });
+  const mb = $('memBtn'); if (mb) mb.onclick = () => { showMembers = !showMembers; localStorage.setItem('dc_mem', showMembers ? '1' : '0'); renderTop(); renderRight(); $('right').classList.toggle('show', showMembers); };
+  const sr = $('srch'); if (sr) { sr.value = searchQ; sr.oninput = () => { searchQ = sr.value; renderMsgs(); }; }
+  const db = $('devBtn'); if (db) db.onclick = openDev;
+}
+let showMembers = localStorage.getItem('dc_mem') !== '0', searchQ = '';
+
+/* ---------- HOME / FRIENDS ---------- */
+function goHome(silent) {
+  view = 'home'; curSrv = null; curCh = null; localStorage.setItem('dc_view', 'home');
+  if (!silent) curDm = null;
+  stopChannel(); renderRail(); renderSide(); renderTop(); renderRight();
+  if (curDm) openDm(curDm.id); else renderHomeMain();
+}
+function setCenterMode(chat) { $('composer').classList.toggle('hidden', !chat); $('typing').classList.toggle('hidden', !chat); }
+function renderHomeMain() {
+  if (view !== 'home' || curDm) return;
+  const keepV = $('addIn')?.value, keepF = document.activeElement?.id === 'addIn', keepE = $('addErr')?.outerHTML;
+  setCenterMode(false);
+  const other = f => f.users.find(x => x !== me.uid);
+  const ok = friends.filter(f => f.status === 'ok');
+  const row = (uid, btns, sub) => `<div class="frow" data-u="${uid}">${avatar(uid, 36, true, 'var(--main)')}<div class="n"><b>${esc(nameOf(uid))} <span style="color:var(--dim);font-weight:400;font-size:13px">${esc(users[uid]?.handle || '')}</span></b><small>${sub || esc(users[uid]?.custom || STATUS_TX[status(uid)])}</small></div>${btns}</div>`;
+  let h = '<div class="flist">';
+  if (homeTab === 'add') {
+    h += `<div class="addf"><h2>Přidat přítele</h2><p>Přátele si můžeš přidat podle jejich uživatelského jména.</p><div class="bx"><input id="addIn" placeholder="Můžeš přidávat přátele podle uživatelského jména."><button class="btn sm" id="addGo">Poslat žádost o přátelství</button></div><div class="err" id="addErr" style="color:var(--mut)"></div></div>
+      <div style="border-top:1px solid var(--line);margin-top:26px;padding-top:20px"><h2 style="font-size:16px;margin-bottom:6px">Tvoje uživatelské jméno</h2><p style="color:var(--mut);font-size:14px">Pošli ho kámošům: <b style="color:#fff">${esc(myP().handle || '')}</b></p></div>`;
+  } else if (homeTab === 'pending') {
+    const inc = friends.filter(f => f.status === 'pending' && f.from !== me.uid), out = friends.filter(f => f.status === 'pending' && f.from === me.uid);
+    if (!inc.length && !out.length) h += `<div class="emptyc" style="height:70%"><div style="font-size:60px">🐺</div>Nikdo nečeká na žádost o přátelství. Tady máš alespoň vlka.</div>`;
+    else {
+      h += `<div class="fhead">Nevyřízeno — ${inc.length + out.length}</div>`;
+      h += inc.map(f => row(other(f), `<button class="rbtn g" data-acc="${f.id}" title="Přijmout">${I.check}</button><button class="rbtn r" data-del="${f.id}" title="Odmítnout">${I.x}</button>`, 'Příchozí žádost o přátelství')).join('');
+      h += out.map(f => row(other(f), `<button class="rbtn r" data-del="${f.id}" title="Zrušit">${I.x}</button>`, 'Odchozí žádost o přátelství')).join('');
+    }
+  } else {
+    const list = ok.map(other).filter(u => homeTab === 'all' || status(u) !== 'offline');
+    if (!list.length) h += `<div class="emptyc" style="height:80%">${homeTab === 'online' ? 'Momentálně nejsou žádní přátelé online. Zkus to znovu později!' : 'Zatím nemáš žádné přátele. Přidej si je přes „Přidat přítele“ 👋'}</div>`;
+    else { h += `<div class="fhead">${homeTab === 'online' ? 'Online' : 'Všichni přátelé'} — ${list.length}</div>`; h += list.map(u => row(u, `<button class="rbtn" data-msg="${u}" title="Zpráva">${I.chat}</button><button class="rbtn r" data-rm="${pairId(u, me.uid)}" title="Odebrat">${I.x}</button>`)).join(''); }
+  }
+  h += '</div>';
+  $('msgs').innerHTML = h;
+  const ai = $('addIn'); if (ai && keepV != null) { ai.value = keepV; if (keepE) $('addErr').outerHTML = keepE; if (keepF) ai.focus(); }
+  if (ai) { const go = () => sendFriendReq(ai.value); $('addGo').onclick = go; ai.onkeydown = e => { if (e.key === 'Enter') go(); }; }
+  $('msgs').querySelectorAll('[data-acc]').forEach(b => b.onclick = e => { e.stopPropagation(); updateDoc(D('dc_friends', b.dataset.acc), { status: 'ok' }).then(() => toast('🎉 Teď jste přátelé')).catch(fail); });
+  $('msgs').querySelectorAll('[data-del]').forEach(b => b.onclick = e => { e.stopPropagation(); deleteDoc(D('dc_friends', b.dataset.del)).catch(fail); });
+  $('msgs').querySelectorAll('[data-rm]').forEach(b => b.onclick = e => { e.stopPropagation(); if (confirm('Odebrat z přátel?')) deleteDoc(D('dc_friends', b.dataset.rm)).catch(fail); });
+  $('msgs').querySelectorAll('[data-msg]').forEach(b => b.onclick = e => { e.stopPropagation(); startDm(b.dataset.msg); });
+  $('msgs').querySelectorAll('.frow').forEach(r => r.onclick = () => startDm(r.dataset.u));
+}
+async function sendFriendReq(raw) {
+  const h = slug(String(raw || '').replace(/^@/, '')); const err = $('addErr');
+  const say = (t, ok) => { if (err) { err.textContent = t; err.style.color = ok ? '#5be38d' : '#ff6b6e'; } else toast(t); };
+  if (!h) return say('Napiš uživatelské jméno.');
+  try {
+    const s = await getDoc(D('dc_names', h));
+    if (!s.exists()) return say('Hmm, to nefungovalo. Zkontroluj, že je uživatelské jméno správně.');
+    const uid = s.data().uid; if (uid === me.uid) return say('Sám sebe si přidat nemůžeš 😄');
+    const id = pairId(uid, me.uid), ex = await getDoc(D('dc_friends', id));
+    if (ex.exists()) { const d = ex.data(); if (d.status === 'ok') return say('Už jste přátelé!'); if (d.from !== me.uid) { await updateDoc(D('dc_friends', id), { status: 'ok' }); return say('🎉 Teď jste přátelé', true); } return say('Žádost už byla odeslána.'); }
+    await setDoc(D('dc_friends', id), { users: [me.uid, uid], from: me.uid, status: 'pending', t: Date.now() });
+    say(`Úspěch! Tvoje žádost o přátelství pro ${h} byla odeslána.`, true);
+    if ($('addIn')) $('addIn').value = '';
+  } catch (e) { fail(e); }
+}
+async function ensureDm(uid) { const id = 'dm_' + pairId(uid, me.uid); const s = await getDoc(D('dc_channels', id)); if (!s.exists()) await setDoc(D('dc_channels', id), { dm: true, members: [me.uid, uid], created: Date.now(), last: Date.now() }); return id; }
+async function startDm(uid) {
+  try {
+    const id = await ensureDm(uid);
+    if (view !== 'home') { view = 'home'; curSrv = null; renderRail(); }
+    curDm = { id, dm: true, members: [me.uid, uid] };
+    openDm(id);
+  } catch (e) { fail(e); }
+}
+function openDm(id) {
+  const c = dms.find(x => x.id === id) || curDm; if (!c) return;
+  curDm = c; view = 'home'; localStorage.setItem('dc_view', 'home');
+  closeMobile(); renderSide(); renderTop(); renderRight();
+  listenChannel(c);
+}
+function newDmModal() {
+  const ok = friends.filter(f => f.status === 'ok').map(f => f.users.find(x => x !== me.uid));
+  modal(`<button class="mx" id="mx">✕</button><h2>Vybrat přítele</h2><p class="sub">Komu chceš napsat?</p><input id="dmq" placeholder="Napiš jméno přítele"><div id="dml" style="margin-top:10px;max-height:300px;overflow-y:auto"></div>`, () => {
+    const draw = () => { const q = $('dmq').value.toLowerCase(); $('dml').innerHTML = ok.filter(u => (nameOf(u) + (users[u]?.handle || '')).toLowerCase().includes(q)).map(u => `<div class="mem" data-u="${u}">${avatar(u, 32, true, '#18181b')}<span class="n">${esc(nameOf(u))}</span><span style="color:var(--dim);font-size:13px">${esc(users[u]?.handle || '')}</span></div>`).join('') || '<p style="color:var(--mut);text-align:center">Žádní přátelé. Přidej si je v sekci Přátelé.</p>'; $('dml').querySelectorAll('[data-u]').forEach(e => e.onclick = () => { closeModal(); startDm(e.dataset.u); }); };
+    $('dmq').oninput = draw; draw(); $('dmq').focus();
   });
 }
 
-const fmtTime = t => { const d = new Date(t), n = new Date(); const hm = d.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' }); return d.toDateString() === n.toDateString() ? 'Dnes v ' + hm : d.toLocaleDateString('cs-CZ') + ' ' + hm; };
-function linkify(s) { return esc(s).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:#00a8fc">$1</a>'); }
+/* ---------- SERVERS ---------- */
+const canManage = () => !!(curSrv && (curSrv.owner === me.uid || isDev()));
+const isMod = uid => !!(curSrv && (curSrv.mods || []).includes(uid));
+const canModerate = () => !!(curSrv && (curSrv.owner === me.uid || isMod(me.uid) || isDev()));
+function selectServer(id) {
+  const s = servers.find(x => x.id === id); if (!s) return;
+  view = id; curSrv = s; curDm = null; localStorage.setItem('dc_view', id); searchQ = '';
+  renderRail(); renderTop(); renderRight();
+  $('sideBody').innerHTML = ''; stopChannel(); unsub.ch && unsub.ch();
+  curCh = null; channels = [];
+  unsub.ch = onSnapshot(query(C('dc_channels'), where('srv', '==', id)), sn => {
+    channels = sn.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (a.pos ?? a.created ?? 0) - (b.pos ?? b.created ?? 0));
+    const text = channels.filter(c => c.type !== 'voice');
+    if (!curCh || !text.find(c => c.id === curCh.id)) {
+      const want = localStorage.getItem('dc_ch_' + id);
+      if (text.length) selectChannel((text.find(c => c.id === want) || text[0]).id); else { curCh = null; stopChannel(); $('msgs').innerHTML = ''; setCenterMode(false); renderTop(); }
+    } else { curCh = text.find(c => c.id === curCh.id); renderTop(); }
+    renderSide();
+  }, fail);
+  renderSide();
+}
+function selectChannel(id) {
+  curCh = channels.find(c => c.id === id); if (!curCh) return;
+  localStorage.setItem('dc_ch_' + curSrv.id, id); searchQ = '';
+  renderSide(); renderTop();
+  listenChannel(curCh);
+}
+let msgs = [], curListen = null;
+function stopChannel() { unsub.msg && unsub.msg(); unsub.typing && unsub.typing(); unsub.msg = unsub.typing = null; curListen = null; msgs = []; pendingImg = null; drawPreview(); }
+function listenChannel(c) {
+  stopChannel(); curListen = c;
+  setCenterMode(true);
+  const nm = c.dm ? '@' + nameOf(c.members.find(x => x !== me.uid) || me.uid) : '#' + c.name;
+  $('inp').placeholder = 'Zpráva ' + nm;
+  renderMsgs(true);
+  unsub.msg = onSnapshot(query(C('dc_messages'), where('ch', '==', c.id)), s => {
+    const box = $('msgs'), atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 150;
+    msgs = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (a.t || 0) - (b.t || 0)).slice(-300);
+    renderMsgs(atBottom);
+  }, fail);
+  unsub.typing = onSnapshot(D('dc_typing', c.id), s => {
+    const d = s.exists() ? s.data() : {};
+    const who = Object.entries(d).filter(([u, t]) => u !== me.uid && Date.now() - t < 6000).map(([u]) => nameOf(u));
+    $('typing').innerHTML = who.length ? `<b>${esc(who.join(', '))}</b> ${who.length > 1 ? 'píšou' : 'píše'}…` : '';
+  });
+  setTimeout(() => $('inp').focus(), 50);
+}
+
+const fmtTime = t => { const d = new Date(t), n = new Date(), y = new Date(Date.now() - 864e5); const hm = d.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' }); return d.toDateString() === n.toDateString() ? 'Dnes v ' + hm : d.toDateString() === y.toDateString() ? 'Včera v ' + hm : d.toLocaleDateString('cs-CZ') + ' ' + hm; };
+const linkify = s => esc(s).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:#00a8fc">$1</a>').replace(/@(\w[\w.]*)/g, (m, h) => Object.values(users).some(u => u.handle === h.toLowerCase()) ? `<span style="background:#5865f24d;color:#c9cdfb;border-radius:3px;padding:0 2px">@${h}</span>` : m);
+function censor(t) {
+  const w = (curSrv?.badwords || []).filter(Boolean); if (!w.length || curListen?.dm) return t;
+  const re = new RegExp('(' + w.map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')', 'gi');
+  return t.replace(re, m => m[0] + '*'.repeat(Math.max(m.length - 1, 1)));
+}
+function roleTag(uid) { if (users[uid]?.owner) return '<span class="tag">OWNER</span>'; if (devs[uid]) return '<span class="tag dev">DEV</span>'; if (view !== 'home' && isMod(uid)) return '<span class="tag mod">MOD</span>'; return ''; }
 
 function renderMsgs(scroll) {
-  if (!curCh) return;
+  const c = curListen; if (!c) return;
   const box = $('msgs');
-  let html = `<div class="welcome"><h2># ${esc(curCh.name)}</h2>Tohle je začátek kanálu #${esc(curCh.name)} 🎉</div>`;
+  let h = '';
+  if (c.dm) {
+    const o = c.members.find(x => x !== me.uid) || me.uid;
+    h = `<div class="chwel">${avatar(o, 80)}<h2 style="margin-top:10px">${esc(nameOf(o))}</h2><p style="font-size:18px;color:#fff;margin-bottom:4px">${esc(users[o]?.handle || '')}</p><p>Toto je začátek historie tvých přímých zpráv s uživatelem <b>${esc(nameOf(o))}</b>.</p></div>`;
+  } else {
+    const first = channels.filter(x => x.type !== 'voice')[0];
+    if (first && first.id === c.id && curSrv.owner === me.uid && msgs.length < 3 && !searchQ) {
+      const st = curSrv.steps || {};
+      h = `<div class="welcome"><h2>Vítej v<br>${esc(curSrv.name)}</h2><p>Tohle je tvůj zbrusu nový nablýskaný server. Tady je pár kroků, které ti pomohou do začátku.</p>
+       <button class="step ${st.invite ? 'done' : ''}" data-step="invite"><span class="e">💌</span><span class="sp">Pozvi přátele</span><span class="ar">${st.invite ? '✓' : '›'}</span></button>
+       <button class="step ${isImg(curSrv.icon) ? 'done' : ''}" data-step="icon"><span class="e">🎨</span><span class="sp">Přizpůsob si server ikonou</span><span class="ar">${isImg(curSrv.icon) ? '✓' : '›'}</span></button>
+       <button class="step ${msgs.length ? 'done' : ''}" data-step="msg"><span class="e">✉️</span><span class="sp">Pošli svou první zprávu</span><span class="ar">${msgs.length ? '✓' : '›'}</span></button>
+       <button class="step" data-step="ch"><span class="e">➕</span><span class="sp">Vytvoř nový kanál</span><span class="ar">›</span></button></div>`;
+    } else h = `<div class="chwel"><div class="big">#</div><h2>Vítej v #${esc(c.name)}!</h2><p>Toto je začátek kanálu #${esc(c.name)}.</p></div>`;
+  }
   let prev = null;
-  for (const m of msgs) {
+  const list = searchQ ? msgs.filter(m => (m.text || '').toLowerCase().includes(searchQ.toLowerCase())) : msgs;
+  if (searchQ) h = `<div style="padding:8px 16px;color:var(--mut)">🔍 ${list.length} výsledků pro „${esc(searchQ)}“</div>`;
+  for (const m of list) {
     const u = users[m.uid] || { name: 'Neznámý', color: '#777' };
-    const cont = prev && prev.uid === m.uid && m.t - prev.t < 300000;
-    const mine = m.uid === me.uid, canDel = mine || canModerate();
+    const cont = !searchQ && prev && prev.uid === m.uid && m.t - prev.t < 420000;
+    const mine = m.uid === me.uid, canDel = mine || (!c.dm && canModerate()) || isDev();
     const rx = m.rx || {};
-    const rxHtml = Object.entries(rx).filter(([, a]) => a && a.length).map(([e, a]) => `<span data-e="${e}" class="${a.includes(me.uid) ? 'mine' : ''}">${e} ${a.length}</span>`).join('');
-    html += `<div class="msg ${cont ? 'cont' : ''}" data-id="${m.id}">${avatar(m.uid)}<div class="bd">`
-      + (cont ? '' : `<div class="hd"><span class="au" style="color:${esc(u.color)}">${esc(u.name)}</span>${roleTag(m.uid)}${curSrv.owner === m.uid ? '<span class="crown" title="Majitel">👑</span>' : ''}<span class="tm">${fmtTime(m.t)}</span></div>`)
-      + `<div class="tx">${linkify(censor(m.text))}${m.edited ? ' <span class="ed">(upraveno)</span>' : ''}</div>`
-      + (rxHtml ? `<div class="rx">${rxHtml}</div>` : '')
-      + `</div><div class="acts"><button data-a="react" title="Reakce">😀</button>${mine ? '<button data-a="edit" title="Upravit">✏️</button>' : ''}${canDel ? '<button data-a="del" title="Smazat">🗑️</button>' : ''}</div></div>`;
+    const rxH = Object.entries(rx).filter(([, a]) => a && a.length).map(([e, a]) => `<span data-e="${e}" class="${a.includes(me.uid) ? 'mine' : ''}">${e} ${a.length}</span>`).join('');
+    const hm = new Date(m.t).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
+    h += `<div class="msg ${cont ? 'cont' : ''}" data-id="${m.id}"><div class="lt">${avatar(m.uid, 40)}<div class="ht">${hm}</div></div><div class="bd">`
+      + (cont ? '' : `<div class="hd"><span class="au" data-u="${m.uid}" style="color:${esc(u.color)}">${esc(u.name)}</span>${roleTag(m.uid)}<span class="tm">${fmtTime(m.t)}</span></div>`)
+      + (m.text ? `<div class="tx">${linkify(censor(m.text))}${m.edited ? ' <span class="ed">(upraveno)</span>' : ''}</div>` : '')
+      + (m.img ? `<img class="im" src="${m.img}" alt="obrázek">` : '')
+      + (rxH ? `<div class="rx">${rxH}</div>` : '')
+      + `</div><div class="acts"><button data-a="react" title="Přidat reakci">😀</button>${mine && m.text ? '<button data-a="edit" title="Upravit">✏️</button>' : ''}<button data-a="reply" title="Zmínit">↩️</button>${canDel ? '<button data-a="del" title="Smazat">🗑️</button>' : ''}</div></div>`;
     prev = m;
   }
-  box.innerHTML = html;
+  box.innerHTML = h;
   box.querySelectorAll('.msg').forEach(el => {
     const m = msgs.find(x => x.id === el.dataset.id);
     el.querySelectorAll('.acts button').forEach(b => b.onclick = () => msgAction(b.dataset.a, m));
     el.querySelectorAll('.rx span').forEach(s => s.onclick = () => toggleReact(m, s.dataset.e));
+    el.querySelectorAll('.au,.lt .av').forEach(a => a.onclick = ev => { ev.stopPropagation(); userPop(m.uid, ev); });
+    const im = el.querySelector('.im'); if (im) im.onclick = () => { $('lbImg').src = m.img; $('lightbox').classList.remove('hidden'); };
+  });
+  box.querySelectorAll('[data-step]').forEach(b => b.onclick = () => {
+    const s = b.dataset.step;
+    if (s === 'invite') inviteModal(); if (s === 'icon') serverSettings(); if (s === 'msg') $('inp').focus(); if (s === 'ch') addChannelModal('text');
   });
   if (scroll) box.scrollTop = box.scrollHeight;
 }
-
-async function toggleReact(m, e) {
-  const has = (m.rx?.[e] || []).includes(me.uid);
-  try { await updateDoc(D('dc_messages', m.id), { ['rx.' + e]: has ? arrayRemove(me.uid) : arrayUnion(me.uid) }); } catch (er) { fail(er); }
-}
+$('lightbox').onclick = () => $('lightbox').classList.add('hidden');
+async function toggleReact(m, e) { const has = (m.rx?.[e] || []).includes(me.uid); try { await updateDoc(D('dc_messages', m.id), { ['rx.' + e]: has ? arrayRemove(me.uid) : arrayUnion(me.uid) }); } catch (er) { fail(er); } }
 function msgAction(a, m) {
-  if (a === 'del') { if (confirm('Smazat zprávu?')) deleteDoc(D('dc_messages', m.id)).catch(fail); }
-  if (a === 'react') modal(`<h2>Reakce</h2><div class="emo" style="justify-content:center">${REACT.map(e => `<button data-e="${e}">${e}</button>`).join('')}</div><button class="btn gray" id="mx">Zavřít</button>`, () => {
-    $('mcard').querySelectorAll('.emo button').forEach(b => b.onclick = () => { toggleReact(m, b.dataset.e); closeModal(); });
+  if (a === 'del') { if (confirm('Opravdu smazat zprávu?')) deleteDoc(D('dc_messages', m.id)).catch(fail); }
+  if (a === 'reply') { const hd = users[m.uid]?.handle; if (hd) { $('inp').value = '@' + hd + ' ' + $('inp').value; $('inp').focus(); } }
+  if (a === 'react') modal(`<button class="mx" id="mx">✕</button><h2>Přidat reakci</h2><div class="chips" style="justify-content:center;gap:8px;margin-top:12px">${REACT.map(e => `<button data-e="${e}" style="width:46px;height:46px;border-radius:10px;background:#1f1f24;font-size:24px">${e}</button>`).join('')}</div>`, () => {
+    $('mcard').querySelectorAll('[data-e]').forEach(b => b.onclick = () => { toggleReact(m, b.dataset.e); closeModal(); });
   });
-  if (a === 'edit') modal(`<h2>Upravit zprávu</h2><textarea id="edt" rows="4" maxlength="2000">${esc(m.text)}</textarea><div class="row"><button class="btn gray" id="mx">Zrušit</button><button class="btn" id="mok">Uložit</button></div>`, () => {
-    $('mok').onclick = async () => { const t = $('edt').value.trim(); if (!t) return; try { await updateDoc(D('dc_messages', m.id), { text: t, edited: true }); closeModal(); } catch (e) { fail(e); } };
+  if (a === 'edit') modal(`<button class="mx" id="mx">✕</button><h2>Upravit zprávu</h2><textarea id="edt" rows="4" maxlength="2000">${esc(m.text)}</textarea><div class="mfoot"><button class="link" id="mx2">Zrušit</button><button class="btn sm" id="mok">Uložit</button></div>`, () => {
+    $('mx2').onclick = closeModal;
+    $('mok').onclick = async () => { const t = $('edt').value.trim(); if (!t) return; try { await updateDoc(D('dc_messages', m.id), { text: censor(t), edited: true }); closeModal(); } catch (e) { fail(e); } };
   });
 }
 
 /* ---------- SEND ---------- */
 const inp = $('inp');
-let lastTyping = 0;
+let lastTyping = 0, lastSend = 0;
 inp.addEventListener('input', () => {
-  inp.style.height = 'auto'; inp.style.height = Math.min(inp.scrollHeight, 150) + 'px';
-  if (curCh && Date.now() - lastTyping > 3000) { lastTyping = Date.now(); setDoc(D('dc_typing', curCh.id), { [me.uid]: Date.now() }, { merge: true }).catch(()=>{}); }
+  inp.style.height = 'auto'; inp.style.height = Math.min(inp.scrollHeight, 180) + 'px';
+  if (curListen && Date.now() - lastTyping > 3000) { lastTyping = Date.now(); setDoc(D('dc_typing', curListen.id), { [me.uid]: Date.now() }, { merge: true }).catch(() => {}); }
 });
 inp.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('form').requestSubmit(); } });
-let lastSend = 0;
+$('attBtn').onclick = () => $('attFile').click();
+$('attFile').onchange = async () => { const f = $('attFile').files[0]; $('attFile').value = ''; if (!f) return; try { pendingImg = await readImage(f, 900, .72); drawPreview(); } catch { toast('❌ Obrázek nejde načíst'); } };
+inp.addEventListener('paste', async e => { const it = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/')); if (it) { e.preventDefault(); pendingImg = await readImage(it.getAsFile(), 900, .72); drawPreview(); } });
+function drawPreview() { $('preview').innerHTML = pendingImg ? `<div style="position:relative"><img src="${pendingImg}" alt=""><button id="rmPrev" style="position:absolute;top:-6px;right:-6px;background:var(--bad);color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px">✕</button></div>` : ''; const r = $('rmPrev'); if (r) r.onclick = () => { pendingImg = null; drawPreview(); }; }
 $('form').onsubmit = async e => {
   e.preventDefault();
-  const t = inp.value.trim(); if (!t || !curCh) return;
+  const t = inp.value.trim(), c = curListen; if ((!t && !pendingImg) || !c) return;
   if (isBanned(me.uid)) { const u = banUntil(me.uid); toast(u === Infinity ? '⛔ Máš trvalý ban' : '⛔ Máš ban do ' + new Date(u).toLocaleTimeString('cs-CZ')); return; }
   if (Date.now() - lastSend < 700) { toast('🐢 Pomaleji'); return; }
-  lastSend = Date.now(); inp.value = ''; inp.style.height = 'auto';
+  lastSend = Date.now();
+  const img = pendingImg; inp.value = ''; inp.style.height = 'auto'; pendingImg = null; drawPreview();
   try {
-    await addDoc(C('dc_messages'), { ch: curCh.id, srv: curSrv.id, uid: me.uid, text: censor(t).slice(0, 2000), t: Date.now() });
-    setDoc(D('dc_typing', curCh.id), { [me.uid]: 0 }, { merge: true }).catch(()=>{});
-  } catch (er) { inp.value = t; fail(er); }
+    const d = { ch: c.id, uid: me.uid, text: censor(t).slice(0, 2000), t: Date.now() };
+    if (img) d.img = img; if (!c.dm) d.srv = curSrv.id;
+    await addDoc(C('dc_messages'), d);
+    if (c.dm) updateDoc(D('dc_channels', c.id), { last: Date.now() }).catch(() => {});
+    setDoc(D('dc_typing', c.id), { [me.uid]: 0 }, { merge: true }).catch(() => {});
+  } catch (er) { inp.value = t; pendingImg = img; drawPreview(); fail(er); }
 };
 
-/* ---------- MEMBERS ---------- */
-function renderMembers() {
-  if (!curSrv) return;
+/* ---------- RIGHT PANEL ---------- */
+function renderRight() {
+  const r = $('right');
+  if (view === 'home' && !curDm) {
+    r.classList.remove('hidden');
+    const act = friends.filter(f => f.status === 'ok').map(f => f.users.find(x => x !== me.uid)).filter(u => status(u) !== 'offline' && users[u]?.custom);
+    r.innerHTML = `<h3 style="font-size:20px;margin-bottom:14px">Právě aktivní</h3>` + (act.length ? act.map(u => `<div class="actcard" style="text-align:left;display:flex;gap:10px;align-items:center;margin-bottom:8px">${avatar(u, 36, true, 'var(--card)')}<div><b style="margin:0">${esc(nameOf(u))}</b><p>${esc(users[u].custom)}</p></div></div>`).join('') : `<div class="actcard"><b>Zatím je tu ticho…</b><p>Když někdo z přátel nastaví, co zrovna dělá – např. hraní hry – uvidíš to tady!</p></div>`);
+    return;
+  }
+  if (view === 'home' && curDm) {
+    const o = curDm.members.find(x => x !== me.uid) || me.uid, u = users[o] || {};
+    r.classList.remove('hidden');
+    r.style.padding = '0';
+    r.innerHTML = `<div style="height:110px;background:${bannerCss(u)}"></div><div style="margin:-48px 0 0 16px;border:6px solid var(--main);border-radius:50%;width:max-content">${avatar(o, 84, true, 'var(--main)')}</div><div style="padding:8px 16px"><h3 style="font-size:20px">${esc(u.name || '')}${roleTag(o)}</h3><div style="color:var(--mut)">${esc(u.handle || '')}</div>${u.bio ? `<div class="boxed" style="margin-top:12px"><div class="plab" style="margin:0 0 4px">O mně</div><div class="pbio" style="margin:0">${esc(u.bio)}</div></div>` : ''}<div class="boxed" style="margin-top:12px"><div class="plab" style="margin:0 0 4px">Členem od</div>${u.since ? new Date(u.since).toLocaleDateString('cs-CZ') : '—'}</div></div>`;
+    return;
+  }
+  r.style.padding = '';
+  if (!curSrv || !showMembers) { r.classList.add('hidden'); return; }
+  r.classList.remove('hidden');
   const list = (curSrv.members || []).map(id => ({ id, u: users[id] || { name: '…' } }));
-  const on = list.filter(x => online(x.u)), off = list.filter(x => !online(x.u));
-  const row = x => `<div class="mem ${online(x.u) ? '' : 'off'}"><div style="position:relative">${avatar(x.id, 32)}<span class="dot ${online(x.u) ? 'on' : ''}"></span></div><span class="nm" style="color:${esc(x.u.color)}">${esc(x.u.name)}${roleTag(x.id)}</span>${curSrv.owner === x.id ? '<span class="crown">👑</span>' : ''}</div>`;
-  $('members').innerHTML = `<div class="cat">Online — ${on.length}</div>${on.map(row).join('')}<div class="cat">Offline — ${off.length}</div>${off.map(row).join('')}`;
+  const on = list.filter(x => status(x.id) !== 'offline'), off = list.filter(x => status(x.id) === 'offline');
+  const row = x => `<div class="mem ${status(x.id) === 'offline' ? 'off' : ''}" data-u="${x.id}">${avatar(x.id, 32, true)}<div style="min-width:0"><div class="n" style="color:${esc(x.u.color)}">${esc(x.u.name)}${curSrv.owner === x.id ? ' 👑' : ''}${roleTag(x.id)}</div>${x.u.custom ? `<div style="font-size:12px;color:var(--mut);overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${esc(x.u.custom)}</div>` : ''}</div></div>`;
+  r.innerHTML = `<div class="mhead">Online — ${on.length}</div>${on.map(row).join('')}<div class="mhead">Offline — ${off.length}</div>${off.map(row).join('')}`;
+  r.querySelectorAll('[data-u]').forEach(e => e.onclick = ev => { ev.stopPropagation(); userPop(e.dataset.u, ev); });
 }
-setInterval(renderMembers, 30000);
+setInterval(() => { if (me) { renderRight(); if (view === 'home' && !curDm) renderHomeMain(); } }, 30000);
 
 /* ---------- MODALS ---------- */
 function modal(html, after) { $('mcard').innerHTML = html; $('modal').classList.remove('hidden'); const x = $('mx'); if (x) x.onclick = closeModal; after && after(); }
 function closeModal() { $('modal').classList.add('hidden'); }
-$('modal').onclick = e => { if (e.target.id === 'modal') closeModal(); };
+$('modal').onmousedown = e => { if (e.target.id === 'modal') closeModal(); };
+function closeMobile() { if (innerWidth <= 700) $('app').classList.add('closed'); }
 
-function emojiPicker(sel) { return `<div class="emo" id="emo">${EMOJI.map(e => `<button data-e="${e}" class="${e === sel ? 'on' : ''}">${e}</button>`).join('')}</div>`; }
-function bindEmoji() { let pick = $('emo').querySelector('.on')?.dataset.e; $('emo').querySelectorAll('button').forEach(b => b.onclick = () => { $('emo').querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on'); pick = b.dataset.e; }); return () => pick; }
-
-function addServerModal() {
-  modal(`<h2>Přidat server</h2><p>Vytvoř vlastní, nebo se připoj kódem</p>
-   <label>Název serveru</label><input id="sname" maxlength="30" placeholder="Server kámošů">
-   <label>Ikona</label>${emojiPicker('💬')}
-   <button class="btn" id="screate">Vytvořit server</button>
-   <label style="margin-top:22px">Kód pozvánky</label><input id="scode" placeholder="např. aB3xY9...">
-   <button class="btn gray" id="sjoin">Připojit se</button><button class="link" id="mx">Zavřít</button>`, () => {
-    const getE = bindEmoji();
-    $('screate').onclick = async () => {
-      const n = $('sname').value.trim(); if (n.length < 2) { toast('Napiš název'); return; }
-      try {
-        const now = Date.now();
-        const r = await addDoc(C('dc_servers'), { name: n, icon: getE() || '💬', owner: me.uid, members: [me.uid], created: now });
-        await addDoc(C('dc_channels'), { srv: r.id, name: 'obecné', created: now });
-        await addDoc(C('dc_channels'), { srv: r.id, name: 'memes', created: now + 1 });
-        closeModal(); localStorage.setItem('dc_srv', r.id); setTimeout(() => selectServer(r.id), 400); toast('🎉 Server vytvořen');
-      } catch (e) { fail(e); }
-    };
+const TEMPLATES = {
+  custom: { text: ['obecné'], voice: ['Obecné'] },
+  gaming: { text: ['obecné', 'klipy-a-highlighty', 'hledám-spoluhráče'], voice: ['Lobby', 'Hraní'] },
+  friends: { text: ['obecné', 'plánování-akcí', 'memes'], voice: ['Obecné', 'Pokec'] },
+  study: { text: ['vítejte-a-pravidla', 'oznámení', 'zdroje', 'domácí-úkoly'], voice: ['Studovna'] },
+  school: { text: ['vítejte-a-pravidla', 'oznámení', 'obecné', 'akce'], voice: ['Obecné', 'Schůzka'] }
+};
+function createServerWizard() {
+  let tpl = 'custom', icon = null;
+  const step1 = () => modal(`<button class="mx" id="mx">✕</button><h2>Vytvoř si svůj server</h2><p class="sub">Tvůj server je místem, kde můžeš trávit čas s kamarády. Založ si ho a začni si povídat.</p>
+    <button class="opt" data-tp="custom"><span class="e">🛠️</span><span class="sp">Vytvořit vlastní</span><span class="ar">›</span></button>
+    <div style="font-size:12px;font-weight:700;color:var(--mut);margin:14px 0 8px">Začni se šablonou</div>
+    <button class="opt" data-tp="gaming"><span class="e">🎮</span><span class="sp">Hraní</span><span class="ar">›</span></button>
+    <button class="opt" data-tp="friends"><span class="e">💖</span><span class="sp">Přátelé</span><span class="ar">›</span></button>
+    <button class="opt" data-tp="study"><span class="e">🍎</span><span class="sp">Studijní skupina</span><span class="ar">›</span></button>
+    <button class="opt" data-tp="school"><span class="e">📘</span><span class="sp">Školní klub</span><span class="ar">›</span></button>
+    <h3 style="text-align:center;margin:20px 0 10px">Už máš pozvánku?</h3><button class="btn gray" id="toJoin" style="margin:0">Připojit se k serveru</button>`, () => {
+      $('mcard').querySelectorAll('[data-tp]').forEach(b => b.onclick = () => { tpl = b.dataset.tp; step2(); });
+      $('toJoin').onclick = joinModal;
+    });
+  const step2 = () => modal(`<button class="mx" id="mx">✕</button><h2>Pověz nám něco víc o svém serveru</h2><p class="sub">Rádi bychom ti pomohli s nastavením. Plánuješ svůj nový server používat jen pro pár přátel, nebo pro větší komunitu?</p>
+    <button class="opt" data-k="f"><span class="e">🛋️</span><span class="sp">Pro mě a moje přátele</span><span class="ar">›</span></button>
+    <button class="opt" data-k="c"><span class="e">🌍</span><span class="sp">Pro klub nebo komunitu</span><span class="ar">›</span></button>
+    <p style="text-align:center;font-size:14px;color:var(--mut);margin-top:12px">Nevíš to jistě? Prozatím můžeš <button class="link" id="skip">tuto otázku přeskočit</button>.</p>
+    <div class="mfoot"><button id="back" style="font-weight:600">Zpět</button></div>`, () => {
+      $('mcard').querySelectorAll('[data-k]').forEach(b => b.onclick = step3); $('skip').onclick = step3; $('back').onclick = step1;
+    });
+  const step3 = () => modal(`<button class="mx" id="mx">✕</button><h2>Přizpůsob si svůj server</h2><p class="sub">Dodej svému novému serveru vlastní osobnost pomocí názvu a ikony. Později je můžeš kdykoliv změnit.</p>
+    <div class="upl" id="upl" style="${icon ? `background-image:url(${icon});border-style:solid` : ''}">${icon ? '' : '📷<br>NAHRÁT'}<span class="plus">+</span></div>
+    <label class="l" style="text-transform:none;font-size:14px;color:var(--tx)">Název serveru <span style="color:var(--bad)">*</span></label><input id="sname" maxlength="40" value="Server uživatele ${esc(myP().name || '')}">
+    <p style="font-size:12px;color:var(--mut);margin-top:8px">Vytvořením serveru souhlasíš s tím, že budeš na ostatní hodný 🙂</p>
+    <div class="mfoot"><button id="back" style="font-weight:600">Zpět</button><button class="btn sm" id="screate">Vytvořit</button></div>`, () => {
+      $('back').onclick = step2;
+      $('upl').onclick = async () => { const i = await pickImage(256); if (i) { icon = i; const v = $('sname').value; step3(); $('sname').value = v; } };
+      $('screate').onclick = async () => {
+        const n = $('sname').value.trim(); if (n.length < 2) { toast('Napiš název serveru'); return; }
+        $('screate').disabled = true;
+        try {
+          const now = Date.now();
+          const d = { name: n, owner: me.uid, members: [me.uid], mods: [], created: now, steps: {} }; if (icon) d.icon = icon;
+          const r = await addDoc(C('dc_servers'), d);
+          const t = TEMPLATES[tpl]; let i = 0;
+          for (const c of t.text) await addDoc(C('dc_channels'), { srv: r.id, name: c, type: 'text', created: now + i, pos: i++ });
+          for (const c of t.voice) await addDoc(C('dc_channels'), { srv: r.id, name: c, type: 'voice', created: now + i, pos: i++ });
+          closeModal(); setTimeout(() => selectServer(r.id), 500);
+        } catch (e) { fail(e); $('screate').disabled = false; }
+      };
+    });
+  step1();
+}
+function joinModal() {
+  modal(`<button class="mx" id="mx">✕</button><h2>Připojit se k serveru</h2><p class="sub">Zadej pozvánku níže a připoj se k existujícímu serveru.</p><label class="l">Odkaz na pozvánku <span style="color:var(--bad)">*</span></label><input id="scode" placeholder="https://…/chat/#join=hTKzmak nebo hTKzmak"><div class="mfoot"><button id="mx2" style="font-weight:600">Zpět</button><button class="btn sm" id="sjoin">Připojit se k serveru</button></div>`, () => {
+    $('mx2').onclick = closeModal;
     $('sjoin').onclick = () => { const c = $('scode').value.trim().replace(/.*join=/, ''); if (c) joinServer(c); };
   });
 }
-$('emptyAdd').onclick = addServerModal;
-
 async function joinServer(code) {
   try {
     const s = await getDoc(D('dc_servers', code));
-    if (!s.exists()) { toast('❌ Server s tímhle kódem neexistuje'); return; }
+    if (!s.exists()) { toast('❌ Pozvánka je neplatná nebo vypršela'); return; }
     if ((s.data().banned || []).includes(me.uid)) { toast('⛔ Na tomhle serveru máš ban'); return; }
     await updateDoc(D('dc_servers', code), { members: arrayUnion(me.uid) });
-    closeModal(); localStorage.setItem('dc_srv', code); setTimeout(() => selectServer(code), 400); toast('✅ Připojeno k ' + s.data().name);
+    closeModal(); toast('✅ Vítej na ' + s.data().name); setTimeout(() => selectServer(code), 600);
   } catch (e) { fail(e); }
 }
-
-function addChannelModal() {
-  modal(`<h2>Nový kanál</h2><label>Název kanálu</label><input id="cname" maxlength="24" placeholder="hry"><div class="row"><button class="btn gray" id="mx">Zrušit</button><button class="btn" id="cok">Vytvořit</button></div>`, () => {
-    $('cok').onclick = async () => {
-      const n = $('cname').value.trim().toLowerCase().replace(/\s+/g, '-'); if (!n) return;
-      try { await addDoc(C('dc_channels'), { srv: curSrv.id, name: n, created: Date.now() }); closeModal(); } catch (e) { fail(e); }
-    };
-  });
-}
-
-$('inviteBtn').onclick = () => {
+function inviteModal() {
   if (!curSrv) return;
   const link = location.origin + location.pathname + '#join=' + curSrv.id;
-  modal(`<h2>Pozvi kámoše 👥</h2><p>Pošli jim odkaz nebo kód</p><label>Odkaz</label><input id="ilink" readonly value="${esc(link)}"><label>Kód</label><input readonly value="${esc(curSrv.id)}"><div class="row"><button class="btn gray" id="mx">Zavřít</button><button class="btn" id="icopy">Kopírovat odkaz</button></div>`, () => {
-    $('icopy').onclick = () => { navigator.clipboard.writeText(link).then(() => toast('📋 Zkopírováno')).catch(() => { $('ilink').select(); toast('Zkopíruj ručně'); }); };
-  });
-};
-
-$('srvSet').onclick = () => {
-  if (!curSrv) return;
-  const owner = curSrv.owner === me.uid;
-  if (!owner && isMod(me.uid)) {
-    const others = (curSrv.members || []).filter(id => id !== me.uid && id !== curSrv.owner && !isMod(id));
-    modal(`<h2>🛡️ Moderátor</h2>
-     <label>Zakázaná slova (oddělená čárkou)</label><textarea id="bw" rows="3">${esc((curSrv.badwords || []).join(', '))}</textarea>
-     <button class="btn" id="bwsave">Uložit slova</button>
-     <label style="margin-top:20px">Členové</label>${others.map(id => `<div class="ch" style="justify-content:space-between">${esc(users[id]?.name || '…')}<button class="link" style="margin:0;color:var(--bad)" data-k="${id}">Vyhodit</button></div>`).join('') || '<p style="text-align:left">Nikdo k moderování</p>'}
-     <button class="btn" style="background:var(--bad)" id="leave">Opustit server</button><button class="link" id="mx">Zavřít</button>`, () => {
-      $('bwsave').onclick = () => saveBadwords();
-      $('mcard').querySelectorAll('[data-k]').forEach(b => b.onclick = async () => { await updateDoc(D('dc_servers', curSrv.id), { members: arrayRemove(b.dataset.k) }).catch(fail); closeModal(); toast('👋 Vyhozen'); });
-      $('leave').onclick = async () => { if (!confirm('Opravdu opustit?')) return; try { await updateDoc(D('dc_servers', curSrv.id), { members: arrayRemove(me.uid), mods: arrayRemove(me.uid) }); curSrv = null; closeModal(); } catch (e) { fail(e); } };
+  modal(`<button class="mx" id="mx">✕</button><h2 style="text-align:left;font-size:18px">Pozvi přátele na server ${esc(curSrv.name)}</h2>
+   <div id="invF" style="margin:12px 0;max-height:220px;overflow-y:auto"></div>
+   <label class="l">Nebo pošli kamarádovi odkaz s pozvánkou na server</label><div style="display:flex;gap:8px"><input id="ilink" readonly value="${esc(link)}"><button class="btn sm" id="icopy">Kopírovat</button></div>`, () => {
+    const fr = friends.filter(f => f.status === 'ok').map(f => f.users.find(x => x !== me.uid)).filter(u => !(curSrv.members || []).includes(u));
+    $('invF').innerHTML = fr.map(u => `<div class="mem">${avatar(u, 32, false)}<span class="n" style="flex:1">${esc(nameOf(u))}</span><button class="btn sm gray" data-inv="${u}" style="border:1px solid var(--ok)">Pozvat</button></div>`).join('');
+    $('invF').querySelectorAll('[data-inv]').forEach(b => b.onclick = async () => {
+      try { await ensureDm(b.dataset.inv); } catch (e) { return fail(e); }
+      await addDoc(C('dc_messages'), { ch: 'dm_' + pairId(b.dataset.inv, me.uid), uid: me.uid, text: `Pozvánka na server ${curSrv ? curSrv.name : ''}: ${link}`, t: Date.now() }).catch(fail);
+      b.textContent = 'Odesláno'; b.disabled = true;
     });
-    return;
-  }
-  if (!owner) {
-    modal(`<h2>${esc(curSrv.name)}</h2><button class="btn" style="background:var(--bad)" id="leave">Opustit server</button><button class="link" id="mx">Zavřít</button>`, () => {
-      $('leave').onclick = async () => { if (!confirm('Opravdu opustit?')) return; try { await updateDoc(D('dc_servers', curSrv.id), { members: arrayRemove(me.uid) }); curSrv = null; closeModal(); } catch (e) { fail(e); } };
-    });
-    return;
-  }
-  const others = (curSrv.members || []).filter(id => id !== me.uid);
-  modal(`<h2>Nastavení serveru</h2>
-   <label>Název</label><input id="ename" maxlength="30" value="${esc(curSrv.name)}">
-   <label>Ikona</label>${emojiPicker(curSrv.icon)}
-   <button class="btn" id="esave">Uložit</button>
-   <label style="margin-top:20px">Zakázaná slova (oddělená čárkou)</label><textarea id="bw" rows="3" placeholder="slovo1, slovo2">${esc((curSrv.badwords || []).join(', '))}</textarea>
-   <button class="btn gray" id="bwsave">Uložit slova</button>
-   <label style="margin-top:20px">Kanály</label>${channels.map(c => `<div class="ch" style="justify-content:space-between"># ${esc(c.name)}<button class="link" style="margin:0;color:var(--bad)" data-c="${c.id}">Smazat</button></div>`).join('')}
-   <label style="margin-top:20px">Členové</label>${others.length ? others.map(id => `<div class="ch" style="justify-content:space-between">${esc(users[id]?.name || '…')}<span>${isMod(id) ? `<button class="link" style="margin:0;color:#5be38d" data-unmod="${id}">Odebrat MOD</button>` : `<button class="link" style="margin:0;color:#5be38d" data-mod="${id}">Dát MOD</button>`} <button class="link" style="margin:0;color:var(--bad)" data-k="${id}">Vyhodit</button> <button class="link" style="margin:0;color:var(--bad)" data-b="${id}">Ban</button></span></div>`).join('') : '<p style="text-align:left">Zatím nikdo další</p>'}
-   <button class="btn" style="background:var(--bad)" id="edel">Smazat server</button><button class="link" id="mx">Zavřít</button>`, () => {
-    const getE = bindEmoji();
-    $('esave').onclick = async () => { try { await updateDoc(D('dc_servers', curSrv.id), { name: $('ename').value.trim() || curSrv.name, icon: getE() || curSrv.icon }); toast('✅ Uloženo'); closeModal(); } catch (e) { fail(e); } };
-    $('bwsave').onclick = () => saveBadwords();
-    $('mcard').querySelectorAll('[data-mod]').forEach(b => b.onclick = async () => { await updateDoc(D('dc_servers', curSrv.id), { mods: arrayUnion(b.dataset.mod) }).catch(fail); closeModal(); toast('🛡️ Moderátor přidán'); });
-    $('mcard').querySelectorAll('[data-unmod]').forEach(b => b.onclick = async () => { await updateDoc(D('dc_servers', curSrv.id), { mods: arrayRemove(b.dataset.unmod) }).catch(fail); closeModal(); toast('MOD odebrán'); });
-    $('mcard').querySelectorAll('[data-c]').forEach(b => b.onclick = async () => { if (channels.length < 2) { toast('Server musí mít aspoň 1 kanál'); return; } if (confirm('Smazat kanál?')) { await deleteDoc(D('dc_channels', b.dataset.c)).catch(fail); closeModal(); } });
-    $('mcard').querySelectorAll('[data-k]').forEach(b => b.onclick = async () => { await updateDoc(D('dc_servers', curSrv.id), { members: arrayRemove(b.dataset.k) }).catch(fail); closeModal(); toast('👋 Vyhozen'); });
-    $('mcard').querySelectorAll('[data-b]').forEach(b => b.onclick = async () => { await updateDoc(D('dc_servers', curSrv.id), { members: arrayRemove(b.dataset.b), banned: arrayUnion(b.dataset.b) }).catch(fail); closeModal(); toast('⛔ Zabanován'); });
-    $('edel').onclick = async () => { if (!confirm('Opravdu smazat celý server?')) return; try { for (const c of channels) await deleteDoc(D('dc_channels', c.id)); await deleteDoc(D('dc_servers', curSrv.id)); curSrv = null; closeModal(); toast('🗑️ Server smazán'); } catch (e) { fail(e); } };
+    $('icopy').onclick = () => { navigator.clipboard.writeText(link).then(() => { toast('📋 Zkopírováno'); $('icopy').textContent = 'Zkopírováno'; $('icopy').style.background = 'var(--ok)'; }).catch(() => $('ilink').select()); updateDoc(D('dc_servers', curSrv.id), { 'steps.invite': true }).catch(() => {}); };
   });
-};
-
-async function saveBadwords() {
-  const w = [...new Set($('bw').value.split(',').map(x => x.trim().toLowerCase()).filter(x => x.length > 1))].slice(0, 200);
-  try { await updateDoc(D('dc_servers', curSrv.id), { badwords: w }); toast('🚫 Uloženo (' + w.length + ' slov)'); closeModal(); } catch (e) { fail(e); }
 }
-$('profBtn').onclick = () => {
-  modal(`<h2>Tvůj profil</h2><label>Přezdívka</label><input id="pname" maxlength="24" value="${esc(myProfile?.name)}"><label>Barva</label><div class="emo" id="pcol">${COLORS.map(c => `<button data-c="${c}" class="${c === myProfile?.color ? 'on' : ''}" style="background:${c};width:34px;height:34px"></button>`).join('')}</div><div class="row"><button class="btn gray" id="mx">Zrušit</button><button class="btn" id="pok">Uložit</button></div>`, () => {
-    let col = myProfile?.color;
-    $('pcol').querySelectorAll('button').forEach(b => b.onclick = () => { $('pcol').querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on'); col = b.dataset.c; });
-    $('pok').onclick = async () => { const n = $('pname').value.trim(); if (n.length < 2) { toast('Aspoň 2 znaky'); return; } try { await updateDoc(D('dc_users', me.uid), { name: n, color: col }); closeModal(); toast('✅ Uloženo'); } catch (e) { fail(e); } };
+function srvMenu(e) {
+  e.stopPropagation();
+  const own = curSrv.owner === me.uid;
+  $('pop').innerHTML = `<div class="pbox" style="margin:0;border:0">
+    <div class="it" id="smInv" style="color:#949cf7">💌<span class="sp">Pozvat lidi</span></div>
+    ${canManage() || isMod(me.uid) ? `<div class="it" id="smSet">⚙️<span class="sp">Nastavení serveru</span></div>` : ''}
+    ${canManage() ? `<div class="it" id="smCh">➕<span class="sp">Vytvořit kanál</span></div>` : ''}
+    <div class="it" id="smNick">✏️<span class="sp">Upravit profil</span></div>
+    ${own ? '' : `<hr><div class="it" id="smLeave" style="color:#ff6b6e">🚪<span class="sp">Opustit server</span></div>`}</div>`;
+  $('pop').style.width = '240px';
+  const r = $('sideHead').getBoundingClientRect(); placePop(r.left + 10, r.bottom + 4);
+  const hide = () => { $('pop').classList.add('hidden'); $('pop').style.width = ''; };
+  $('smInv').onclick = () => { hide(); inviteModal(); };
+  const s = $('smSet'); if (s) s.onclick = () => { hide(); serverSettings(); };
+  const c = $('smCh'); if (c) c.onclick = () => { hide(); addChannelModal('text'); };
+  $('smNick').onclick = () => { hide(); openProfileEditor(); };
+  const l = $('smLeave'); if (l) l.onclick = async () => { hide(); if (!confirm(`Opravdu chceš opustit ${curSrv.name}?`)) return; try { await updateDoc(D('dc_servers', curSrv.id), { members: arrayRemove(me.uid), mods: arrayRemove(me.uid) }); goHome(); } catch (er) { fail(er); } };
+}
+function addChannelModal(type) {
+  let t = type || 'text';
+  const draw = () => modal(`<button class="mx" id="mx">✕</button><h2 style="text-align:left;font-size:20px">Vytvořit kanál</h2>
+   <label class="l">Typ kanálu</label>
+   <button class="opt" data-ty="text" style="${t === 'text' ? 'border-color:var(--acc)' : ''}"><span class="e">#</span><span class="sp">Textový<br><small style="color:var(--mut);font-weight:400">Posílej zprávy, obrázky a názory</small></span>${t === 'text' ? '◉' : '○'}</button>
+   <button class="opt" data-ty="voice" style="${t === 'voice' ? 'border-color:var(--acc)' : ''}"><span class="e">🔊</span><span class="sp">Hlasový<br><small style="color:var(--mut);font-weight:400">Brzy: hlasový chat</small></span>${t === 'voice' ? '◉' : '○'}</button>
+   <label class="l">Název kanálu</label><input id="cname" maxlength="30" placeholder="${t === 'text' ? 'nový-kanál' : 'Nový kanál'}">
+   <div class="mfoot"><button id="mx2" style="font-weight:600">Zrušit</button><button class="btn sm" id="cok">Vytvořit kanál</button></div>`, () => {
+    $('mx2').onclick = closeModal;
+    $('mcard').querySelectorAll('[data-ty]').forEach(b => b.onclick = () => { const v = $('cname').value; t = b.dataset.ty; draw(); $('cname').value = v; });
+    $('cok').onclick = async () => {
+      let n = $('cname').value.trim(); if (!n) return;
+      if (t === 'text') n = n.toLowerCase().replace(/\s+/g, '-');
+      try { const r = await addDoc(C('dc_channels'), { srv: curSrv.id, name: n, type: t, created: Date.now(), pos: channels.length }); closeModal(); if (t === 'text') setTimeout(() => selectChannel(r.id), 400); } catch (e) { fail(e); }
+    };
+    $('cname').focus();
   });
-};
+  draw();
+}
+function editChannelModal(id) {
+  const c = channels.find(x => x.id === id); if (!c) return;
+  modal(`<button class="mx" id="mx">✕</button><h2 style="text-align:left;font-size:20px">${c.type === 'voice' ? '🔊' : '#'} ${esc(c.name)}</h2>
+   <label class="l">Název kanálu</label><input id="cen" maxlength="30" value="${esc(c.name)}">
+   ${c.type === 'voice' ? '' : `<label class="l">Téma kanálu</label><input id="cet" maxlength="120" value="${esc(c.topic || '')}" placeholder="O čem se tu píše?">`}
+   <div class="mfoot"><button class="btn sm red" id="cdel">Smazat kanál</button><button class="btn sm" id="csave">Uložit změny</button></div>`, () => {
+    $('csave').onclick = async () => { let n = $('cen').value.trim(); if (!n) return; if (c.type !== 'voice') n = n.toLowerCase().replace(/\s+/g, '-'); const d = { name: n }; if ($('cet')) d.topic = $('cet').value.trim(); try { await updateDoc(D('dc_channels', id), d); closeModal(); } catch (e) { fail(e); } };
+    $('cdel').onclick = async () => { if (channels.filter(x => x.type !== 'voice').length < 2 && c.type !== 'voice') { toast('Server musí mít aspoň 1 textový kanál'); return; } if (!confirm('Smazat kanál ' + c.name + '?')) return; try { await deleteDoc(D('dc_channels', id)); closeModal(); } catch (e) { fail(e); } };
+  });
+}
+function serverSettings() {
+  if (!curSrv) return;
+  const own = canManage(), mod = isMod(me.uid);
+  if (!own && !mod) return;
+  let icon = isImg(curSrv.icon) ? curSrv.icon : null;
+  const others = (curSrv.members || []).filter(id => id !== me.uid && id !== curSrv.owner);
+  const draw = () => modal(`<button class="mx" id="mx">✕</button><h2>${own ? 'Nastavení serveru' : '🛡️ Moderátor'}</h2>
+   ${own ? `<div class="upl" id="upl" style="${icon ? `background-image:url(${icon});border-style:solid` : ''}">${icon ? '' : '📷<br>NAHRÁT'}<span class="plus">+</span></div>
+   ${icon ? '<p style="text-align:center;margin:-8px 0 8px"><button class="link" id="rmIcon">Odebrat ikonu</button></p>' : ''}
+   <label class="l">Název serveru</label><input id="ename" maxlength="40" value="${esc(curSrv.name)}"><button class="btn" id="esave">Uložit změny</button>` : ''}
+   <label class="l" style="margin-top:22px">🚫 Zakázaná slova (oddělená čárkou)</label><textarea id="bw" rows="3" placeholder="slovo1, slovo2">${esc((curSrv.badwords || []).join(', '))}</textarea><button class="btn gray" id="bwsave">Uložit slova</button>
+   <label class="l" style="margin-top:22px">Členové — ${others.length}</label>
+   ${others.map(id => `<div class="mem" style="cursor:default">${avatar(id, 30)}<span class="n" style="flex:1">${esc(nameOf(id))}${roleTag(id)}</span>
+     ${own ? (isMod(id) ? `<button class="chip g" data-unmod="${id}">− MOD</button>` : `<button class="chip g" data-mod="${id}">+ MOD</button>`) : ''}
+     ${own || !isMod(id) ? `<button class="chip r" data-k="${id}">Vyhodit</button>` : ''}${own ? `<button class="chip r" data-b="${id}">Ban</button>` : ''}</div>`).join('') || '<p style="color:var(--mut)">Zatím tu nikdo další není.</p>'}
+   ${curSrv.owner === me.uid ? '<button class="btn red" id="edel" style="margin-top:24px">Smazat server</button>' : ''}`, bind);
+  function bind() {
+    if (own) {
+      $('upl').onclick = async () => { const i = await pickImage(256); if (i) { icon = i; const v = $('ename').value; draw(); $('ename').value = v; } };
+      const ri = $('rmIcon'); if (ri) ri.onclick = () => { icon = null; draw(); };
+      $('esave').onclick = async () => { try { await updateDoc(D('dc_servers', curSrv.id), { name: $('ename').value.trim() || curSrv.name, icon: icon || '' }); toast('✅ Uloženo'); closeModal(); } catch (e) { fail(e); } };
+    }
+    $('bwsave').onclick = async () => { const w = [...new Set($('bw').value.split(',').map(x => x.trim().toLowerCase()).filter(x => x.length > 1))].slice(0, 200); try { await updateDoc(D('dc_servers', curSrv.id), { badwords: w }); toast('🚫 Uloženo (' + w.length + ' slov)'); } catch (e) { fail(e); } };
+    const upd = async (data, msg) => { try { await updateDoc(D('dc_servers', curSrv.id), data); toast(msg); setTimeout(() => { curSrv = servers.find(x => x.id === curSrv.id) || curSrv; serverSettings(); }, 300); } catch (e) { fail(e); } };
+    $('mcard').querySelectorAll('[data-mod]').forEach(b => b.onclick = () => upd({ mods: arrayUnion(b.dataset.mod) }, '🛡️ Moderátor přidán'));
+    $('mcard').querySelectorAll('[data-unmod]').forEach(b => b.onclick = () => upd({ mods: arrayRemove(b.dataset.unmod) }, 'MOD odebrán'));
+    $('mcard').querySelectorAll('[data-k]').forEach(b => b.onclick = () => upd({ members: arrayRemove(b.dataset.k), mods: arrayRemove(b.dataset.k) }, '👋 Vyhozen'));
+    $('mcard').querySelectorAll('[data-b]').forEach(b => b.onclick = () => upd({ members: arrayRemove(b.dataset.b), mods: arrayRemove(b.dataset.b), banned: arrayUnion(b.dataset.b) }, '⛔ Zabanován'));
+    const ed = $('edel'); if (ed) ed.onclick = async () => { if (prompt(`Pro smazání napiš název serveru: ${curSrv.name}`) !== curSrv.name) return; try { for (const c of channels) await deleteDoc(D('dc_channels', c.id)); await deleteDoc(D('dc_servers', curSrv.id)); closeModal(); goHome(); toast('🗑️ Server smazán'); } catch (e) { fail(e); } };
+  }
+  draw();
+}
+
+/* ---------- PROFILE EDITOR ---------- */
+function openProfileEditor() {
+  const p = myP();
+  let st = { name: p.name || '', handle: p.handle || '', bio: p.bio || '', avatar: p.avatar || '', banner: p.banner || '', color: p.color || '#5865f2' };
+  const card = () => `<div class="pcard"><div class="bn" style="background:${st.banner || st.color}"></div><div class="pa">${(() => { const bg = st.avatar ? `background-image:url(${st.avatar})` : `background-color:${st.color}`; return `<div class="av" style="width:106px;height:106px;font-size:44px;${bg}">${st.avatar ? '' : esc((st.name || '?')[0].toUpperCase())}<span class="st ${status(me.uid)}" style="width:30px;height:30px;border-color:#141417;border-width:5px"></span></div>`; })()}</div>
+    <div class="pb"><h2>${esc(st.name)}${roleTag(me.uid)}</h2><div style="color:var(--mut);margin-bottom:12px">${esc(st.handle)}</div>
+    <div class="plab">O mně</div><div class="pbio">${st.bio ? esc(st.bio) : '<i style="color:var(--dim)">Popiš se třemi smajlíky</i>'}</div>
+    <div class="plab">Členem od</div><div class="pbio">${p.since ? new Date(p.since).toLocaleDateString('cs-CZ') : '—'}</div></div></div>`;
+  const draw = () => {
+    $('prof').innerHTML = `<div class="pl"><h3>Hlavní profil</h3>
+      <div class="boxed"><label class="l" style="margin-top:0">Zobrazované jméno</label><input id="pn" maxlength="32" value="${esc(st.name)}">
+      <label class="l">Uživatelské jméno</label><input id="ph" maxlength="24" value="${esc(st.handle)}"></div>
+      <div class="boxed"><label class="l" style="margin-top:0">Avatar</label><div class="row2"><div class="tile" id="pAv" style="${st.avatar ? `background-image:url(${st.avatar})` : ''}">${st.avatar ? '' : '＋'}</div><div class="tile" id="pAvRm">🗑️</div></div>
+      <label class="l">Barva avataru</label><div class="chips">${COLORS.map(c => `<button data-c="${c}" class="${c === st.color ? 'on' : ''}" style="background:${c}"></button>`).join('')}</div></div>
+      <div class="boxed"><label class="l" style="margin-top:0">Barva banneru</label><div class="chips">${BANNERS.map(c => `<button data-bn="${c}" class="${c === st.banner ? 'on' : ''}" style="background:${c}"></button>`).join('')}</div></div>
+      <div class="boxed"><label class="l" style="margin-top:0">O mně</label><textarea id="pbio" rows="4" maxlength="190" placeholder="Popiš se třemi smajlíky">${esc(st.bio)}</textarea></div>
+      <button class="btn" id="psave">Uložit změny</button><button class="btn gray" id="pout">Odhlásit se</button></div>
+      <div class="pr" id="pPrev">${card()}</div>`;
+    const live = () => { $('pPrev').innerHTML = card(); };
+    $('pn').oninput = () => { st.name = $('pn').value; live(); };
+    $('ph').oninput = () => { st.handle = slug($('ph').value); live(); };
+    $('pbio').oninput = () => { st.bio = $('pbio').value; live(); };
+    $('pAv').onclick = async () => { const i = await pickImage(256); if (i) { st.avatar = i; draw(); } };
+    $('pAvRm').onclick = () => { st.avatar = ''; draw(); };
+    $('prof').querySelectorAll('[data-c]').forEach(b => b.onclick = () => { st.color = b.dataset.c; draw(); });
+    $('prof').querySelectorAll('[data-bn]').forEach(b => b.onclick = () => { st.banner = b.dataset.bn; draw(); });
+    $('pout').onclick = () => { if (confirm('Odhlásit se?')) { closeProf(); signOut(auth); } };
+    $('psave').onclick = async () => {
+      if (st.name.trim().length < 2) { toast('Jméno musí mít aspoň 2 znaky'); return; }
+      try {
+        const d = { name: st.name.trim(), bio: st.bio.trim(), avatar: st.avatar, banner: st.banner, color: st.color };
+        if (st.handle && st.handle !== p.handle) {
+          if (!(await handleFree(st.handle, me.uid))) { toast('❌ Uživatelské jméno je zabrané'); return; }
+          await setDoc(D('dc_names', st.handle), { uid: me.uid });
+          if (p.handle) deleteDoc(D('dc_names', p.handle)).catch(() => {});
+          d.handle = st.handle;
+        }
+        await updateDoc(D('dc_users', me.uid), d); toast('✅ Profil uložen'); closeProf();
+      } catch (e) { fail(e); }
+    };
+  };
+  draw();
+  $('prof').classList.remove('hidden');
+  let x = $('profX'); if (!x) { x = document.createElement('button'); x.id = 'profX'; x.textContent = '✕'; document.body.appendChild(x); }
+  x.classList.remove('hidden'); x.onclick = closeProf;
+}
+function closeProf() { $('prof').classList.add('hidden'); const x = $('profX'); if (x) x.classList.add('hidden'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeProf(); $('pop').classList.add('hidden'); $('lightbox').classList.add('hidden'); $('dev').classList.add('hidden'); } });
 
 /* ---------- DEV MENU ---------- */
-const isMod = uid => !!(curSrv && (curSrv.mods || []).includes(uid));
-const canModerate = () => !!(curSrv && (curSrv.owner === me.uid || isMod(me.uid) || isDev()));
-function censor(t) {
-  const w = (curSrv?.badwords || []).filter(Boolean); if (!w.length) return t;
-  const re = new RegExp('(' + w.map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')', 'gi');
-  return t.replace(re, m => m[0] + '*'.repeat(Math.max(m.length - 1, 1)));
-}
-function roleTag(uid) { if (users[uid]?.owner) return '<span class="tag">OWNER</span>'; if (devs[uid]) return '<span class="tag" style="background:#5865f2;color:#fff">DEV</span>'; if (isMod(uid)) return '<span class="tag" style="background:#23a55a;color:#fff">MOD</span>'; return ''; }
 function applyGlobals() {
   if (!me) return;
-  if (isOwner() && !users[me.uid]?.owner) updateDoc(D('dc_users', me.uid), { owner: true }).catch(()=>{});
-  $('devBtn').classList.toggle('hidden', !isDev());
-  const m = settings.maint && !isDev();
-  $('maint').classList.toggle('hidden', !m);
+  if (isOwner() && !users[me.uid]?.owner) updateDoc(D('dc_users', me.uid), { owner: true }).catch(() => {});
+  $('maint').classList.toggle('hidden', !(settings.maint && !isDev()));
   $('maintMsg').textContent = settings.maintMsg || 'Vylepšujeme chat, za chvíli jsme zpátky 🙂';
   if (!$('dev').classList.contains('hidden')) renderDev();
-  renderMembers(); renderMsgs();
+  renderTop(); renderRight();
 }
 let devTab = 'home', allServers = [];
-$('devBtn').onclick = async () => { $('dev').classList.remove('hidden'); renderDev(); try { const s = await getDocs(C('dc_servers')); allServers = s.docs.map(d => ({ id: d.id, ...d.data() })); renderDev(); } catch (e) { fail(e); } };
+async function openDev() { $('dev').classList.remove('hidden'); renderDev(); try { const s = await getDocs(C('dc_servers')); allServers = s.docs.map(d => ({ id: d.id, ...d.data() })); renderDev(); } catch (e) { fail(e); } }
 $('devX').onclick = () => $('dev').classList.add('hidden');
 const setG = (name, data) => setDoc(D('dc_globals', name), data, { merge: true }).catch(fail);
 function fmtBan(uid) { const u = banUntil(uid); if (!u || u < Date.now()) return ''; return u === Infinity ? '<span class="chip r">PERMA</span>' : `<span class="chip r">ban do ${new Date(u).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })}</span>`; }
@@ -517,41 +1026,35 @@ function renderDev() {
   const tabs = [['home', '📊 Přehled'], ['users', '👥 Uživatelé'], ['bans', '⛔ Bany'], ['servers', '🌐 Servery']].concat(own ? [['maint', '🔧 Údržba']] : []);
   $('devTabs').innerHTML = tabs.map(([k, l]) => `<button data-t="${k}" class="${devTab === k ? 'on' : ''}">${l}</button>`).join('');
   $('devTabs').querySelectorAll('button').forEach(b => b.onclick = () => { devTab = b.dataset.t; renderDev(); });
-  const uids = Object.keys(users);
-  const banned = uids.filter(isBanned);
+  const uids = Object.keys(users), banned = uids.filter(isBanned);
   let h = '';
-  if (devTab === 'home') {
-    h = `<div class="stats"><div class="stat"><b>${uids.length}</b><span>uživatelé</span></div><div class="stat"><b>${uids.filter(u => online(users[u])).length}</b><span>online</span></div><div class="stat"><b>${allServers.length}</b><span>servery</span></div><div class="stat"><b style="color:#ff8a8c">${banned.length}</b><span>bany</span></div></div>
-      <p style="color:var(--mut)">${own ? 'Jako vlastník můžeš dávat DEV, banovat navždy a zapnout údržbu.' : 'Jako dev můžeš mazat zprávy a dávat bany na 5 minut.'}</p>`;
-  }
+  if (devTab === 'home') h = `<div class="stats"><div class="stat"><b>${uids.length}</b><span>uživatelé</span></div><div class="stat"><b>${uids.filter(u => status(u) !== 'offline').length}</b><span>online</span></div><div class="stat"><b>${allServers.length}</b><span>servery</span></div><div class="stat"><b style="color:#ff8a8c">${banned.length}</b><span>bany</span></div></div><p style="color:var(--mut)">${own ? 'Jako vlastník můžeš dávat DEV, banovat navždy, mazat servery a zapnout údržbu.' : 'Jako dev můžeš mazat zprávy a dávat bany na 5 minut.'}</p>`;
   const userRow = uid => {
     const u = users[uid] || {}, prot = u.owner || uid === me.uid || (!own && devs[uid]);
-    let btns = '';
+    let b = '';
     if (!prot) {
-      btns += isBanned(uid) ? `<button class="chip g" data-unban="${uid}">Zrušit ban</button>` : `<button class="chip r" data-ban="${uid}" data-m="5">5 min</button>` + (own ? `<button class="chip r" data-ban="${uid}" data-m="60">1 h</button><button class="chip r" data-ban="${uid}" data-m="-1">Perma</button>` : '');
-      if (own) btns += devs[uid] ? `<button class="chip" data-undev="${uid}">Odebrat DEV</button>` : `<button class="chip y" data-dev="${uid}">Dát DEV</button>`;
+      b += isBanned(uid) ? `<button class="chip g" data-unban="${uid}">Zrušit ban</button>` : `<button class="chip r" data-ban="${uid}" data-m="5">5 min</button>` + (own ? `<button class="chip r" data-ban="${uid}" data-m="60">1 h</button><button class="chip r" data-ban="${uid}" data-m="-1">Perma</button>` : '');
+      if (own) b += devs[uid] ? `<button class="chip" data-undev="${uid}">Odebrat DEV</button>` : `<button class="chip y" data-dev="${uid}">Dát DEV</button>`;
     }
-    return `<div class="drow">${avatar(uid, 30)}<span class="nm" style="color:${esc(u.color)}">${esc(u.name || '?')}${roleTag(uid)} ${online(u) ? '🟢' : ''} ${fmtBan(uid)}</span>${btns}</div>`;
+    return `<div class="drow">${avatar(uid, 30)}<span class="nm" style="color:${esc(u.color)}">${esc(u.name || '?')} <span style="color:var(--dim);font-size:12px">${esc(u.handle || '')}</span>${roleTag(uid)} ${status(uid) !== 'offline' ? '🟢' : ''} ${fmtBan(uid)}</span>${b}</div>`;
   };
-  if (devTab === 'users') h = `<input id="devQ" placeholder="🔍 Hledat uživatele" value="${esc(window._dq || '')}" style="margin-bottom:8px">` + uids.filter(u => (users[u].name || '').toLowerCase().includes((window._dq || '').toLowerCase())).sort((a, b) => (users[b].seen || 0) - (users[a].seen || 0)).map(userRow).join('');
+  if (devTab === 'users') h = `<input id="devQ" placeholder="🔍 Hledat uživatele" value="${esc(window._dq || '')}" style="margin-bottom:8px">` + uids.filter(u => ((users[u].name || '') + (users[u].handle || '')).toLowerCase().includes((window._dq || '').toLowerCase())).sort((a, b) => (users[b].seen || 0) - (users[a].seen || 0)).map(userRow).join('');
   if (devTab === 'bans') h = banned.length ? banned.map(userRow).join('') : '<p style="color:var(--mut)">Nikdo nemá ban 🎉</p>';
-  if (devTab === 'servers') h = allServers.length ? allServers.map(s => `<div class="drow"><span style="font-size:22px">${esc(s.icon || '💬')}</span><span class="nm">${esc(s.name)} <span style="color:var(--mut);font-size:12px">· ${(s.members || []).length} členů · majitel ${esc(users[s.owner]?.name || '?')}</span></span><button class="chip g" data-join="${s.id}">Vstoupit</button>${own ? `<button class="chip r" data-delsrv="${s.id}">Smazat</button>` : ''}</div>`).join('') : '<p style="color:var(--mut)">Zatím žádné servery</p>';
-  if (devTab === 'maint' && own) h = `<p style="margin-bottom:10px">Údržba skryje chat všem kromě tebe a devů.</p><label style="font-size:12px;color:var(--mut)">Zpráva</label><input id="mMsg" value="${esc(settings.maintMsg || '')}" placeholder="Vylepšujeme chat, za chvíli jsme zpátky 🙂"><button class="btn" id="mToggle" style="background:${settings.maint ? 'var(--ok)' : 'var(--bad)'}">${settings.maint ? '✅ Vypnout údržbu' : '🔧 Zapnout údržbu'}</button>`;
+  if (devTab === 'servers') h = allServers.length ? allServers.map(s => `<div class="drow"><span class="rb" style="width:36px;height:36px;font-size:12px">${srvIco(s)}</span><span class="nm">${esc(s.name)} <span style="color:var(--mut);font-size:12px">· ${(s.members || []).length} členů · majitel ${esc(users[s.owner]?.name || '?')}</span></span><button class="chip g" data-join="${s.id}">Vstoupit</button>${own ? `<button class="chip r" data-delsrv="${s.id}">Smazat</button>` : ''}</div>`).join('') : '<p style="color:var(--mut)">Zatím žádné servery</p>';
+  if (devTab === 'maint' && own) h = `<p style="margin-bottom:10px">Údržba skryje chat všem kromě tebe a devů.</p><label class="l">Zpráva</label><input id="mMsg" value="${esc(settings.maintMsg || '')}" placeholder="Vylepšujeme chat, za chvíli jsme zpátky 🙂"><button class="btn ${settings.maint ? '' : 'red'}" id="mToggle" style="${settings.maint ? 'background:var(--ok)' : ''}">${settings.maint ? '✅ Vypnout údržbu' : '🔧 Zapnout údržbu'}</button>`;
   $('devBody').innerHTML = h;
   const B = $('devBody');
-  const q = $('devQ'); if (q) { q.oninput = () => { window._dq = q.value; renderDev(); const n = $('devQ'); n.focus(); n.setSelectionRange(n.value.length, n.value.length); }; }
+  const q = $('devQ'); if (q) q.oninput = () => { window._dq = q.value; renderDev(); const n = $('devQ'); n.focus(); n.setSelectionRange(n.value.length, n.value.length); };
   B.querySelectorAll('[data-ban]').forEach(b => b.onclick = () => { const m = +b.dataset.m; if (!own && m !== 5) return; setG('bans', { [b.dataset.ban]: m === -1 ? -1 : Date.now() + m * 60000 }); toast('⛔ Ban udělen'); });
   B.querySelectorAll('[data-unban]').forEach(b => b.onclick = () => { setG('bans', { [b.dataset.unban]: 0 }); toast('✅ Ban zrušen'); });
   B.querySelectorAll('[data-dev]').forEach(b => b.onclick = () => { if (own) { setG('devs', { [b.dataset.dev]: true }); toast('🛠️ DEV přidán'); } });
   B.querySelectorAll('[data-undev]').forEach(b => b.onclick = () => { if (own) { setG('devs', { [b.dataset.undev]: false }); toast('DEV odebrán'); } });
-  B.querySelectorAll('[data-join]').forEach(b => b.onclick = async () => { await updateDoc(D('dc_servers', b.dataset.join), { members: arrayUnion(me.uid) }).catch(fail); $('dev').classList.add('hidden'); setTimeout(() => selectServer(b.dataset.join), 400); });
+  B.querySelectorAll('[data-join]').forEach(b => b.onclick = async () => { await updateDoc(D('dc_servers', b.dataset.join), { members: arrayUnion(me.uid) }).catch(fail); $('dev').classList.add('hidden'); setTimeout(() => selectServer(b.dataset.join), 500); });
   B.querySelectorAll('[data-delsrv]').forEach(b => b.onclick = async () => { if (!own || !confirm('Smazat server?')) return; try { const cs = await getDocs(query(C('dc_channels'), where('srv', '==', b.dataset.delsrv))); for (const c of cs.docs) await deleteDoc(c.ref); await deleteDoc(D('dc_servers', b.dataset.delsrv)); allServers = allServers.filter(x => x.id !== b.dataset.delsrv); renderDev(); toast('🗑️ Smazáno'); } catch (e) { fail(e); } });
   const mt = $('mToggle'); if (mt) mt.onclick = () => setG('settings', { maint: !settings.maint, maintMsg: $('mMsg').value.trim() });
 }
 
-$('menuBtn').onclick = () => $('app').classList.toggle('closed');
-$('memBtn').onclick = () => $('app').classList.toggle('membersOpen');
-$('main').addEventListener('click', e => { if (e.target.id !== 'menuBtn' && innerWidth <= 820) $('app').classList.add('closed'); });
+$('center').addEventListener('click', () => { if (innerWidth <= 700) $('app').classList.add('closed'); });
 </script>
 </body>
 </html>
