@@ -883,7 +883,7 @@ $('form').onsubmit = async e => {
 /* ---------- VOICE / CALLS (WebRTC) ---------- */
 const ICE = { iceServers: [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun.cloudflare.com:3478'] }] };
 let call = null, voiceState = {}, voiceView = false, curVoiceCh = null, incoming = {}, dismissed = {};
-const FRESH = 45000;
+const FRESH = 120000;
 const freshParts = p => Object.entries(p || {}).filter(([, v]) => v && Date.now() - (v.t || 0) < FRESH);
 let actx = null;
 function tone(kind) {
@@ -919,7 +919,8 @@ async function joinVoice(id, o) {
   const base = { srv: o.srv || 'dm', p: { [me.uid]: { t: Date.now(), t0: Date.now(), mute: micOff, deaf: hpOff, cam: false, screen: false } } };
   if (o.dmFor) base.dmFor = o.dmFor;
   try { await setDoc(D('dc_voice', id), base, { merge: true }); } catch (e) { fail(e); call = null; stream.getTracks().forEach(t => t.stop()); return; }
-  call.hb = setInterval(() => updateDoc(D('dc_voice', id), { [`p.${me.uid}.t`]: Date.now() }).catch(() => {}), 15000);
+  const beat = () => { if (call && call.id === id) updateDoc(D('dc_voice', id), { [`p.${me.uid}.t`]: Date.now() }).catch(() => {}); };
+  try { const w = new Worker(URL.createObjectURL(new Blob(['setInterval(()=>postMessage(1),5000)'], { type: 'text/javascript' }))); let n = 0; w.onmessage = () => { if (++n % 3 === 0) beat(); watchdog(); }; call.worker = w; } catch { call.hb = setInterval(() => { beat(); watchdog(); }, 15000); }
   call.unsub = onSnapshot(D('dc_voice', id), sn => { if (!call || call.id !== id) return; call.parts = (sn.data() || {}).p || {}; syncPeers(); renderCallView(); renderVbar(); if (call.o.srv) { voiceState[id] = call.parts; renderSide(); } });
   watchLevel(me.uid, stream);
   tone('join'); renderVbar(); renderCallView();
@@ -927,7 +928,7 @@ async function joinVoice(id, o) {
 async function leaveVoice(silent) {
   if (!call) return;
   const c = call; call = null;
-  clearInterval(c.hb); c.unsub && c.unsub();
+  clearInterval(c.hb); c.worker && c.worker.terminate(); c.unsub && c.unsub();
   Object.keys(c.peers).forEach(u => closePeer(u, c));
   [c.stream, c.cam, c.screen].forEach(st => st && st.getTracks().forEach(t => t.stop()));
   updateDoc(D('dc_voice', c.id), { [`p.${me.uid}`]: deleteField() }).catch(() => {});
@@ -943,17 +944,21 @@ function syncPeers() {
   if (!call) return;
   const live = new Set(freshParts(call.parts).map(([u]) => u).filter(u => u !== me.uid));
   for (const u of live) if (!call.peers[u]) initPeer(u);
-  for (const u of Object.keys(call.peers)) if (!live.has(u)) closePeer(u);
+  for (const u of Object.keys(call.peers)) { if (live.has(u)) continue; const P = call.peers[u]; if (!call.parts[u] || P.pc?.connectionState !== 'connected') closePeer(u); }
 }
 function newPc(P) {
   const pc = new RTCPeerConnection(ICE);
   P.pc = pc; P.ci = 0; P.remote = false; P.q = []; P.ready = false; P.media = new MediaStream();
   pc.ontrack = e => { P.media.getTracks().filter(t => t.kind === e.track.kind).forEach(t => P.media.removeTrack(t)); P.media.addTrack(e.track); attachRemote(P); e.track.onunmute = () => renderCallView(); };
   pc.onicecandidate = e => { if (!e.candidate) return; const v = P.sess + '|' + JSON.stringify(e.candidate.toJSON()); if (P.ready) updateDoc(D('dc_rtc', P.sid), { [P.mine]: arrayUnion(v) }).catch(() => {}); else P.q.push(v); };
+  P.started = Date.now();
   pc.onconnectionstatechange = () => {
-    if (!call || call.peers[P.uid] !== P) return;
-    if (pc.connectionState === 'failed' && P.init) { setTimeout(() => { if (call && call.peers[P.uid] === P) offer(P); }, 1500); }
-    renderCallView();
+    if (!call || call.peers[P.uid] !== P || P.pc !== pc) return;
+    const st = pc.connectionState;
+    if (st === 'connected') P.okAt = Date.now();
+    if (st === 'failed') restartPeer(P);
+    if (st === 'disconnected') setTimeout(() => { if (call && call.peers[P.uid] === P && P.pc === pc && pc.connectionState !== 'connected') restartPeer(P); }, 5000);
+    renderCallView(); renderVbar();
   };
   return pc;
 }
@@ -995,6 +1000,22 @@ function addCands(P, d) {
   const list = (d[P.theirs] || []).filter(x => x.startsWith(P.sess + '|'));
   for (const x of list.slice(P.ci)) { try { P.pc.addIceCandidate(JSON.parse(x.slice(x.indexOf('|') + 1))).catch(() => {}); } catch {} }
   P.ci = list.length;
+}
+function restartPeer(P) {
+  if (!call || call.peers[P.uid] !== P) return;
+  if (Date.now() - (P.lastRestart || 0) < 8000) return;
+  P.lastRestart = Date.now();
+  if (P.init) offer(P);
+  else updateDoc(D('dc_rtc', P.sid), { answer: null, restart: Date.now() }).catch(() => {});
+}
+function watchdog() {
+  if (!call) return;
+  syncPeers();
+  for (const P of Object.values(call.peers)) {
+    const st = P.pc?.connectionState;
+    if (st !== 'connected' && Date.now() - (P.started || 0) > 15000) restartPeer(P);
+  }
+  renderVbar();
 }
 function initPeer(u) {
   const P = { uid: u, init: me.uid < u, sid: sigId(u), mine: me.uid < u ? 'cA' : 'cB', theirs: me.uid < u ? 'cB' : 'cA' };
