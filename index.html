@@ -74,6 +74,19 @@ input,textarea{font:inherit;color:var(--tx);background:var(--bg0);border:0;borde
 .row{display:flex;gap:8px}.row .btn{flex:1}.btn.gray{background:var(--bg3)}
 #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#111214;padding:10px 16px;border-radius:8px;z-index:60;opacity:0;transition:.25s;pointer-events:none}
 #toast.show{opacity:1}
+.dev{position:fixed;inset:0;background:#000c;z-index:40;display:flex;align-items:center;justify-content:center}
+.devbox{background:var(--bg1);width:min(760px,96vw);height:min(640px,92vh);border-radius:12px;display:flex;flex-direction:column;overflow:hidden;border:1px solid #fbbf2455}
+.devhd{padding:14px 18px;display:flex;align-items:center;gap:10px;background:linear-gradient(90deg,#f59e0b33,transparent)}.devhd h2{color:#fbbf24;flex:1}
+.devhd button{background:none;color:var(--mut);font-size:20px}
+.devtabs{display:flex;gap:6px;padding:8px 14px;overflow-x:auto}.devtabs button{background:var(--bg3);color:var(--mut);padding:6px 12px;border-radius:99px;font-weight:700;font-size:13px;white-space:nowrap}
+.devtabs button.on{background:#fbbf24;color:#000}
+.devbody{flex:1;overflow-y:auto;padding:10px 16px 16px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}.stat{background:#0005;border-radius:10px;padding:10px;text-align:center}.stat b{display:block;font-size:22px;color:#fbbf24}.stat span{font-size:11px;color:var(--mut);text-transform:uppercase}
+.drow{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;flex-wrap:wrap}.drow:hover{background:var(--bg3)}.drow .nm{flex:1;min-width:120px}
+.chip{background:var(--bg3);color:var(--tx);padding:4px 9px;border-radius:99px;font-size:12px;font-weight:700}.chip.r{background:#f23f4333;color:#ff8a8c}.chip.y{background:#fbbf2433;color:#fbbf24}.chip.g{background:#23a55a33;color:#5be38d}
+.tag{font-size:10px;font-weight:800;padding:1px 6px;border-radius:4px;background:#fbbf24;color:#000;margin-left:4px}
+#maint{position:fixed;inset:0;background:var(--bg0);z-index:45;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:20px}
+.gbtn{background:#fff;color:#222;display:flex;align-items:center;justify-content:center;gap:8px}
 #empty{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--mut);text-align:center;padding:20px}
 @media(max-width:820px){
  #members{display:none}#menuBtn{display:block}
@@ -93,6 +106,7 @@ input,textarea{font:inherit;color:var(--tx);background:var(--bg0);border:0;borde
   <label>Heslo</label><input id="lpass" type="password" autocomplete="current-password">
   <button class="btn" id="lgo">Přihlásit se</button>
   <div class="err" id="lerr"></div>
+  <button class="btn gbtn" id="lgoogle" style="margin-top:10px">👑 Vlastník: přihlásit přes Google</button>
   <button class="link" id="lswitch">Nemáš účet? Zaregistruj se</button>
  </div>
 </div>
@@ -105,7 +119,7 @@ input,textarea{font:inherit;color:var(--tx);background:var(--bg0);border:0;borde
   <div id="me"><div class="av" id="meAv"></div><span class="nm" id="meName"></span><button id="profBtn" title="Profil">✏️</button><button id="outBtn" title="Odhlásit">🚪</button></div>
  </aside>
  <main id="main">
-  <div id="top"><button id="menuBtn">☰</button><span id="chTitle"># </span><span class="sp"></span><button id="memBtn" title="Členové">👥</button></div>
+  <div id="top"><button id="menuBtn">☰</button><span id="chTitle"># </span><span class="sp"></span><button id="devBtn" class="hidden" title="Dev menu" style="color:#fbbf24">🛠️</button><button id="memBtn" title="Členové">👥</button></div>
   <div id="empty" class="hidden"><div style="font-size:56px">💬</div><h2 style="color:var(--tx)">Zatím nejsi na žádném serveru</h2><p>Vytvoř si vlastní, nebo se připoj kódem od kámoše.</p><button class="btn" style="width:auto" id="emptyAdd">➕ Vytvořit / připojit</button></div>
   <div id="msgs"></div>
   <div id="typing"></div>
@@ -114,13 +128,15 @@ input,textarea{font:inherit;color:var(--tx);background:var(--bg0);border:0;borde
  <aside id="members"></aside>
 </div>
 
+<div id="dev" class="dev hidden"><div class="devbox"><div class="devhd"><span style="font-size:24px">🛠️</span><h2>Dev menu</h2><span id="devRole" class="chip y"></span><button id="devX">✕</button></div><div class="devtabs" id="devTabs"></div><div class="devbody" id="devBody"></div></div></div>
+<div id="maint" class="hidden"><div style="font-size:60px">🛠️</div><h2>Probíhá údržba</h2><p style="color:var(--mut)" id="maintMsg"></p><button class="btn" style="width:auto" id="maintOut">Odhlásit se</button></div>
 <div id="modal" class="hidden"><div class="card" id="mcard"></div></div>
 <div id="toast"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, collection, doc, setDoc, addDoc, getDoc, updateDoc, deleteDoc, onSnapshot, query, where, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, collection, doc, setDoc, addDoc, getDoc, updateDoc, deleteDoc, onSnapshot, query, where, arrayUnion, arrayRemove, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 const firebaseConfig = {"apiKey": "AIzaSyBovG00qfDWUBcS9pJlS_FwOH4etF9Sv0Y", "authDomain": "flex-bubble.firebaseapp.com", "projectId": "flex-bubble", "storageBucket": "flex-bubble.firebasestorage.app", "messagingSenderId": "171220277752", "appId": "1:171220277752:web:d5d68647bf1759db58de0d"};
 const APP = 'flex-bubble-prod-v10';
@@ -164,6 +180,14 @@ async function doLogin() {
 $('lgo').onclick = doLogin;
 $('lpass').onkeydown = e => { if (e.key === 'Enter') doLogin(); };
 $('outBtn').onclick = () => signOut(auth);
+$('maintOut').onclick = () => signOut(auth);
+$('lgoogle').onclick = async () => { $('lerr').textContent = ''; try { await signInWithPopup(auth, new GoogleAuthProvider()); } catch (e) { $('lerr').textContent = authErr(e.code); } };
+const OWNER_EMAIL = 'mrwolfvrcz@gmail.com';
+const isOwner = () => !!(me && me.email === OWNER_EMAIL && me.emailVerified);
+let devs = {}, bans = {}, settings = {};
+const isDev = () => isOwner() || !!devs[me?.uid];
+const banUntil = uid => bans[uid] === -1 ? Infinity : (bans[uid] || 0);
+const isBanned = uid => banUntil(uid) > Date.now();
 
 onAuthStateChanged(auth, async u => {
   Object.values(unsub).forEach(f => f && f());
@@ -171,7 +195,7 @@ onAuthStateChanged(auth, async u => {
   me = u;
   const snap = await getDoc(D('dc_users', u.uid));
   if (!snap.exists()) {
-    const nm = (u.email || 'uživatel').split('@')[0].slice(0, 24);
+    const nm = (u.email === OWNER_EMAIL ? 'Wolfe' : (u.displayName || (u.email || 'uživatel').split('@')[0])).slice(0, 24);
     await setDoc(D('dc_users', u.uid), { name: nm, color: COLORS[Math.floor(Math.random()*COLORS.length)], seen: Date.now() });
   }
   $('login').classList.add('hidden'); $('app').classList.remove('hidden');
@@ -197,6 +221,11 @@ function startApp() {
     myProfile = users[me.uid];
     if (myProfile) { $('meName').textContent = myProfile.name; $('meAv').outerHTML = avatar(me.uid).replace('class="av"', 'class="av" id="meAv"'); }
     renderMembers(); renderMsgs();
+  });
+  unsub.g = onSnapshot(C('dc_globals'), s => {
+    devs = {}; bans = {}; settings = {};
+    s.forEach(d => { if (d.id === 'devs') devs = d.data(); if (d.id === 'bans') bans = d.data(); if (d.id === 'settings') settings = d.data(); });
+    applyGlobals();
   });
   unsub.srv = onSnapshot(query(C('dc_servers'), where('members', 'array-contains', me.uid)), s => {
     servers = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (a.created || 0) - (b.created || 0));
@@ -280,11 +309,11 @@ function renderMsgs(scroll) {
   for (const m of msgs) {
     const u = users[m.uid] || { name: 'Neznámý', color: '#777' };
     const cont = prev && prev.uid === m.uid && m.t - prev.t < 300000;
-    const mine = m.uid === me.uid, canDel = mine || (curSrv && curSrv.owner === me.uid);
+    const mine = m.uid === me.uid, canDel = mine || (curSrv && curSrv.owner === me.uid) || isDev();
     const rx = m.rx || {};
     const rxHtml = Object.entries(rx).filter(([, a]) => a && a.length).map(([e, a]) => `<span data-e="${e}" class="${a.includes(me.uid) ? 'mine' : ''}">${e} ${a.length}</span>`).join('');
     html += `<div class="msg ${cont ? 'cont' : ''}" data-id="${m.id}">${avatar(m.uid)}<div class="bd">`
-      + (cont ? '' : `<div class="hd"><span class="au" style="color:${esc(u.color)}">${esc(u.name)}</span>${curSrv.owner === m.uid ? '<span class="crown" title="Majitel">👑</span>' : ''}<span class="tm">${fmtTime(m.t)}</span></div>`)
+      + (cont ? '' : `<div class="hd"><span class="au" style="color:${esc(u.color)}">${esc(u.name)}</span>${roleTag(m.uid)}${curSrv.owner === m.uid ? '<span class="crown" title="Majitel">👑</span>' : ''}<span class="tm">${fmtTime(m.t)}</span></div>`)
       + `<div class="tx">${linkify(m.text)}${m.edited ? ' <span class="ed">(upraveno)</span>' : ''}</div>`
       + (rxHtml ? `<div class="rx">${rxHtml}</div>` : '')
       + `</div><div class="acts"><button data-a="react" title="Reakce">😀</button>${mine ? '<button data-a="edit" title="Upravit">✏️</button>' : ''}${canDel ? '<button data-a="del" title="Smazat">🗑️</button>' : ''}</div></div>`;
@@ -325,6 +354,7 @@ let lastSend = 0;
 $('form').onsubmit = async e => {
   e.preventDefault();
   const t = inp.value.trim(); if (!t || !curCh) return;
+  if (isBanned(me.uid)) { const u = banUntil(me.uid); toast(u === Infinity ? '⛔ Máš trvalý ban' : '⛔ Máš ban do ' + new Date(u).toLocaleTimeString('cs-CZ')); return; }
   if (Date.now() - lastSend < 700) { toast('🐢 Pomaleji'); return; }
   lastSend = Date.now(); inp.value = ''; inp.style.height = 'auto';
   try {
@@ -338,7 +368,7 @@ function renderMembers() {
   if (!curSrv) return;
   const list = (curSrv.members || []).map(id => ({ id, u: users[id] || { name: '…' } }));
   const on = list.filter(x => online(x.u)), off = list.filter(x => !online(x.u));
-  const row = x => `<div class="mem ${online(x.u) ? '' : 'off'}"><div style="position:relative">${avatar(x.id, 32)}<span class="dot ${online(x.u) ? 'on' : ''}"></span></div><span class="nm" style="color:${esc(x.u.color)}">${esc(x.u.name)}</span>${curSrv.owner === x.id ? '<span class="crown">👑</span>' : ''}</div>`;
+  const row = x => `<div class="mem ${online(x.u) ? '' : 'off'}"><div style="position:relative">${avatar(x.id, 32)}<span class="dot ${online(x.u) ? 'on' : ''}"></span></div><span class="nm" style="color:${esc(x.u.color)}">${esc(x.u.name)}${roleTag(x.id)}</span>${curSrv.owner === x.id ? '<span class="crown">👑</span>' : ''}</div>`;
   $('members').innerHTML = `<div class="cat">Online — ${on.length}</div>${on.map(row).join('')}<div class="cat">Offline — ${off.length}</div>${off.map(row).join('')}`;
 }
 setInterval(renderMembers, 30000);
@@ -434,6 +464,61 @@ $('profBtn').onclick = () => {
     $('pok').onclick = async () => { const n = $('pname').value.trim(); if (n.length < 2) { toast('Aspoň 2 znaky'); return; } try { await updateDoc(D('dc_users', me.uid), { name: n, color: col }); closeModal(); toast('✅ Uloženo'); } catch (e) { fail(e); } };
   });
 };
+
+/* ---------- DEV MENU ---------- */
+function roleTag(uid) { if (users[uid]?.owner) return '<span class="tag">OWNER</span>'; if (devs[uid]) return '<span class="tag" style="background:#5865f2;color:#fff">DEV</span>'; return ''; }
+function applyGlobals() {
+  if (!me) return;
+  if (isOwner() && !users[me.uid]?.owner) updateDoc(D('dc_users', me.uid), { owner: true }).catch(()=>{});
+  $('devBtn').classList.toggle('hidden', !isDev());
+  const m = settings.maint && !isDev();
+  $('maint').classList.toggle('hidden', !m);
+  $('maintMsg').textContent = settings.maintMsg || 'Vylepšujeme chat, za chvíli jsme zpátky 🙂';
+  if (!$('dev').classList.contains('hidden')) renderDev();
+  renderMembers(); renderMsgs();
+}
+let devTab = 'home', allServers = [];
+$('devBtn').onclick = async () => { $('dev').classList.remove('hidden'); renderDev(); try { const s = await getDocs(C('dc_servers')); allServers = s.docs.map(d => ({ id: d.id, ...d.data() })); renderDev(); } catch (e) { fail(e); } };
+$('devX').onclick = () => $('dev').classList.add('hidden');
+const setG = (name, data) => setDoc(D('dc_globals', name), data, { merge: true }).catch(fail);
+function fmtBan(uid) { const u = banUntil(uid); if (!u || u < Date.now()) return ''; return u === Infinity ? '<span class="chip r">PERMA</span>' : `<span class="chip r">ban do ${new Date(u).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })}</span>`; }
+function renderDev() {
+  const own = isOwner();
+  $('devRole').textContent = own ? '👑 Vlastník' : '🛠️ Dev';
+  const tabs = [['home', '📊 Přehled'], ['users', '👥 Uživatelé'], ['bans', '⛔ Bany'], ['servers', '🌐 Servery']].concat(own ? [['maint', '🔧 Údržba']] : []);
+  $('devTabs').innerHTML = tabs.map(([k, l]) => `<button data-t="${k}" class="${devTab === k ? 'on' : ''}">${l}</button>`).join('');
+  $('devTabs').querySelectorAll('button').forEach(b => b.onclick = () => { devTab = b.dataset.t; renderDev(); });
+  const uids = Object.keys(users);
+  const banned = uids.filter(isBanned);
+  let h = '';
+  if (devTab === 'home') {
+    h = `<div class="stats"><div class="stat"><b>${uids.length}</b><span>uživatelé</span></div><div class="stat"><b>${uids.filter(u => online(users[u])).length}</b><span>online</span></div><div class="stat"><b>${allServers.length}</b><span>servery</span></div><div class="stat"><b style="color:#ff8a8c">${banned.length}</b><span>bany</span></div></div>
+      <p style="color:var(--mut)">${own ? 'Jako vlastník můžeš dávat DEV, banovat navždy a zapnout údržbu.' : 'Jako dev můžeš mazat zprávy a dávat bany na 5 minut.'}</p>`;
+  }
+  const userRow = uid => {
+    const u = users[uid] || {}, prot = u.owner || uid === me.uid || (!own && devs[uid]);
+    let btns = '';
+    if (!prot) {
+      btns += isBanned(uid) ? `<button class="chip g" data-unban="${uid}">Zrušit ban</button>` : `<button class="chip r" data-ban="${uid}" data-m="5">5 min</button>` + (own ? `<button class="chip r" data-ban="${uid}" data-m="60">1 h</button><button class="chip r" data-ban="${uid}" data-m="-1">Perma</button>` : '');
+      if (own) btns += devs[uid] ? `<button class="chip" data-undev="${uid}">Odebrat DEV</button>` : `<button class="chip y" data-dev="${uid}">Dát DEV</button>`;
+    }
+    return `<div class="drow">${avatar(uid, 30)}<span class="nm" style="color:${esc(u.color)}">${esc(u.name || '?')}${roleTag(uid)} ${online(u) ? '🟢' : ''} ${fmtBan(uid)}</span>${btns}</div>`;
+  };
+  if (devTab === 'users') h = `<input id="devQ" placeholder="🔍 Hledat uživatele" value="${esc(window._dq || '')}" style="margin-bottom:8px">` + uids.filter(u => (users[u].name || '').toLowerCase().includes((window._dq || '').toLowerCase())).sort((a, b) => (users[b].seen || 0) - (users[a].seen || 0)).map(userRow).join('');
+  if (devTab === 'bans') h = banned.length ? banned.map(userRow).join('') : '<p style="color:var(--mut)">Nikdo nemá ban 🎉</p>';
+  if (devTab === 'servers') h = allServers.length ? allServers.map(s => `<div class="drow"><span style="font-size:22px">${esc(s.icon || '💬')}</span><span class="nm">${esc(s.name)} <span style="color:var(--mut);font-size:12px">· ${(s.members || []).length} členů · majitel ${esc(users[s.owner]?.name || '?')}</span></span><button class="chip g" data-join="${s.id}">Vstoupit</button>${own ? `<button class="chip r" data-delsrv="${s.id}">Smazat</button>` : ''}</div>`).join('') : '<p style="color:var(--mut)">Zatím žádné servery</p>';
+  if (devTab === 'maint' && own) h = `<p style="margin-bottom:10px">Údržba skryje chat všem kromě tebe a devů.</p><label style="font-size:12px;color:var(--mut)">Zpráva</label><input id="mMsg" value="${esc(settings.maintMsg || '')}" placeholder="Vylepšujeme chat, za chvíli jsme zpátky 🙂"><button class="btn" id="mToggle" style="background:${settings.maint ? 'var(--ok)' : 'var(--bad)'}">${settings.maint ? '✅ Vypnout údržbu' : '🔧 Zapnout údržbu'}</button>`;
+  $('devBody').innerHTML = h;
+  const B = $('devBody');
+  const q = $('devQ'); if (q) { q.oninput = () => { window._dq = q.value; renderDev(); const n = $('devQ'); n.focus(); n.setSelectionRange(n.value.length, n.value.length); }; }
+  B.querySelectorAll('[data-ban]').forEach(b => b.onclick = () => { const m = +b.dataset.m; if (!own && m !== 5) return; setG('bans', { [b.dataset.ban]: m === -1 ? -1 : Date.now() + m * 60000 }); toast('⛔ Ban udělen'); });
+  B.querySelectorAll('[data-unban]').forEach(b => b.onclick = () => { setG('bans', { [b.dataset.unban]: 0 }); toast('✅ Ban zrušen'); });
+  B.querySelectorAll('[data-dev]').forEach(b => b.onclick = () => { if (own) { setG('devs', { [b.dataset.dev]: true }); toast('🛠️ DEV přidán'); } });
+  B.querySelectorAll('[data-undev]').forEach(b => b.onclick = () => { if (own) { setG('devs', { [b.dataset.undev]: false }); toast('DEV odebrán'); } });
+  B.querySelectorAll('[data-join]').forEach(b => b.onclick = async () => { await updateDoc(D('dc_servers', b.dataset.join), { members: arrayUnion(me.uid) }).catch(fail); $('dev').classList.add('hidden'); setTimeout(() => selectServer(b.dataset.join), 400); });
+  B.querySelectorAll('[data-delsrv]').forEach(b => b.onclick = async () => { if (!own || !confirm('Smazat server?')) return; try { const cs = await getDocs(query(C('dc_channels'), where('srv', '==', b.dataset.delsrv))); for (const c of cs.docs) await deleteDoc(c.ref); await deleteDoc(D('dc_servers', b.dataset.delsrv)); allServers = allServers.filter(x => x.id !== b.dataset.delsrv); renderDev(); toast('🗑️ Smazáno'); } catch (e) { fail(e); } });
+  const mt = $('mToggle'); if (mt) mt.onclick = () => setG('settings', { maint: !settings.maint, maintMsg: $('mMsg').value.trim() });
+}
 
 $('menuBtn').onclick = () => $('app').classList.toggle('closed');
 $('memBtn').onclick = () => $('app').classList.toggle('membersOpen');
