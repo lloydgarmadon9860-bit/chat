@@ -309,12 +309,12 @@ function renderMsgs(scroll) {
   for (const m of msgs) {
     const u = users[m.uid] || { name: 'Neznámý', color: '#777' };
     const cont = prev && prev.uid === m.uid && m.t - prev.t < 300000;
-    const mine = m.uid === me.uid, canDel = mine || (curSrv && curSrv.owner === me.uid) || isDev();
+    const mine = m.uid === me.uid, canDel = mine || canModerate();
     const rx = m.rx || {};
     const rxHtml = Object.entries(rx).filter(([, a]) => a && a.length).map(([e, a]) => `<span data-e="${e}" class="${a.includes(me.uid) ? 'mine' : ''}">${e} ${a.length}</span>`).join('');
     html += `<div class="msg ${cont ? 'cont' : ''}" data-id="${m.id}">${avatar(m.uid)}<div class="bd">`
       + (cont ? '' : `<div class="hd"><span class="au" style="color:${esc(u.color)}">${esc(u.name)}</span>${roleTag(m.uid)}${curSrv.owner === m.uid ? '<span class="crown" title="Majitel">👑</span>' : ''}<span class="tm">${fmtTime(m.t)}</span></div>`)
-      + `<div class="tx">${linkify(m.text)}${m.edited ? ' <span class="ed">(upraveno)</span>' : ''}</div>`
+      + `<div class="tx">${linkify(censor(m.text))}${m.edited ? ' <span class="ed">(upraveno)</span>' : ''}</div>`
       + (rxHtml ? `<div class="rx">${rxHtml}</div>` : '')
       + `</div><div class="acts"><button data-a="react" title="Reakce">😀</button>${mine ? '<button data-a="edit" title="Upravit">✏️</button>' : ''}${canDel ? '<button data-a="del" title="Smazat">🗑️</button>' : ''}</div></div>`;
     prev = m;
@@ -358,7 +358,7 @@ $('form').onsubmit = async e => {
   if (Date.now() - lastSend < 700) { toast('🐢 Pomaleji'); return; }
   lastSend = Date.now(); inp.value = ''; inp.style.height = 'auto';
   try {
-    await addDoc(C('dc_messages'), { ch: curCh.id, srv: curSrv.id, uid: me.uid, text: t.slice(0, 2000), t: Date.now() });
+    await addDoc(C('dc_messages'), { ch: curCh.id, srv: curSrv.id, uid: me.uid, text: censor(t).slice(0, 2000), t: Date.now() });
     setDoc(D('dc_typing', curCh.id), { [me.uid]: 0 }, { merge: true }).catch(()=>{});
   } catch (er) { inp.value = t; fail(er); }
 };
@@ -434,6 +434,19 @@ $('inviteBtn').onclick = () => {
 $('srvSet').onclick = () => {
   if (!curSrv) return;
   const owner = curSrv.owner === me.uid;
+  if (!owner && isMod(me.uid)) {
+    const others = (curSrv.members || []).filter(id => id !== me.uid && id !== curSrv.owner && !isMod(id));
+    modal(`<h2>🛡️ Moderátor</h2>
+     <label>Zakázaná slova (oddělená čárkou)</label><textarea id="bw" rows="3">${esc((curSrv.badwords || []).join(', '))}</textarea>
+     <button class="btn" id="bwsave">Uložit slova</button>
+     <label style="margin-top:20px">Členové</label>${others.map(id => `<div class="ch" style="justify-content:space-between">${esc(users[id]?.name || '…')}<button class="link" style="margin:0;color:var(--bad)" data-k="${id}">Vyhodit</button></div>`).join('') || '<p style="text-align:left">Nikdo k moderování</p>'}
+     <button class="btn" style="background:var(--bad)" id="leave">Opustit server</button><button class="link" id="mx">Zavřít</button>`, () => {
+      $('bwsave').onclick = () => saveBadwords();
+      $('mcard').querySelectorAll('[data-k]').forEach(b => b.onclick = async () => { await updateDoc(D('dc_servers', curSrv.id), { members: arrayRemove(b.dataset.k) }).catch(fail); closeModal(); toast('👋 Vyhozen'); });
+      $('leave').onclick = async () => { if (!confirm('Opravdu opustit?')) return; try { await updateDoc(D('dc_servers', curSrv.id), { members: arrayRemove(me.uid), mods: arrayRemove(me.uid) }); curSrv = null; closeModal(); } catch (e) { fail(e); } };
+    });
+    return;
+  }
   if (!owner) {
     modal(`<h2>${esc(curSrv.name)}</h2><button class="btn" style="background:var(--bad)" id="leave">Opustit server</button><button class="link" id="mx">Zavřít</button>`, () => {
       $('leave').onclick = async () => { if (!confirm('Opravdu opustit?')) return; try { await updateDoc(D('dc_servers', curSrv.id), { members: arrayRemove(me.uid) }); curSrv = null; closeModal(); } catch (e) { fail(e); } };
@@ -445,11 +458,16 @@ $('srvSet').onclick = () => {
    <label>Název</label><input id="ename" maxlength="30" value="${esc(curSrv.name)}">
    <label>Ikona</label>${emojiPicker(curSrv.icon)}
    <button class="btn" id="esave">Uložit</button>
+   <label style="margin-top:20px">Zakázaná slova (oddělená čárkou)</label><textarea id="bw" rows="3" placeholder="slovo1, slovo2">${esc((curSrv.badwords || []).join(', '))}</textarea>
+   <button class="btn gray" id="bwsave">Uložit slova</button>
    <label style="margin-top:20px">Kanály</label>${channels.map(c => `<div class="ch" style="justify-content:space-between"># ${esc(c.name)}<button class="link" style="margin:0;color:var(--bad)" data-c="${c.id}">Smazat</button></div>`).join('')}
-   <label style="margin-top:20px">Členové</label>${others.length ? others.map(id => `<div class="ch" style="justify-content:space-between">${esc(users[id]?.name || '…')}<span><button class="link" style="margin:0;color:var(--bad)" data-k="${id}">Vyhodit</button> <button class="link" style="margin:0;color:var(--bad)" data-b="${id}">Ban</button></span></div>`).join('') : '<p style="text-align:left">Zatím nikdo další</p>'}
+   <label style="margin-top:20px">Členové</label>${others.length ? others.map(id => `<div class="ch" style="justify-content:space-between">${esc(users[id]?.name || '…')}<span>${isMod(id) ? `<button class="link" style="margin:0;color:#5be38d" data-unmod="${id}">Odebrat MOD</button>` : `<button class="link" style="margin:0;color:#5be38d" data-mod="${id}">Dát MOD</button>`} <button class="link" style="margin:0;color:var(--bad)" data-k="${id}">Vyhodit</button> <button class="link" style="margin:0;color:var(--bad)" data-b="${id}">Ban</button></span></div>`).join('') : '<p style="text-align:left">Zatím nikdo další</p>'}
    <button class="btn" style="background:var(--bad)" id="edel">Smazat server</button><button class="link" id="mx">Zavřít</button>`, () => {
     const getE = bindEmoji();
     $('esave').onclick = async () => { try { await updateDoc(D('dc_servers', curSrv.id), { name: $('ename').value.trim() || curSrv.name, icon: getE() || curSrv.icon }); toast('✅ Uloženo'); closeModal(); } catch (e) { fail(e); } };
+    $('bwsave').onclick = () => saveBadwords();
+    $('mcard').querySelectorAll('[data-mod]').forEach(b => b.onclick = async () => { await updateDoc(D('dc_servers', curSrv.id), { mods: arrayUnion(b.dataset.mod) }).catch(fail); closeModal(); toast('🛡️ Moderátor přidán'); });
+    $('mcard').querySelectorAll('[data-unmod]').forEach(b => b.onclick = async () => { await updateDoc(D('dc_servers', curSrv.id), { mods: arrayRemove(b.dataset.unmod) }).catch(fail); closeModal(); toast('MOD odebrán'); });
     $('mcard').querySelectorAll('[data-c]').forEach(b => b.onclick = async () => { if (channels.length < 2) { toast('Server musí mít aspoň 1 kanál'); return; } if (confirm('Smazat kanál?')) { await deleteDoc(D('dc_channels', b.dataset.c)).catch(fail); closeModal(); } });
     $('mcard').querySelectorAll('[data-k]').forEach(b => b.onclick = async () => { await updateDoc(D('dc_servers', curSrv.id), { members: arrayRemove(b.dataset.k) }).catch(fail); closeModal(); toast('👋 Vyhozen'); });
     $('mcard').querySelectorAll('[data-b]').forEach(b => b.onclick = async () => { await updateDoc(D('dc_servers', curSrv.id), { members: arrayRemove(b.dataset.b), banned: arrayUnion(b.dataset.b) }).catch(fail); closeModal(); toast('⛔ Zabanován'); });
@@ -457,6 +475,10 @@ $('srvSet').onclick = () => {
   });
 };
 
+async function saveBadwords() {
+  const w = [...new Set($('bw').value.split(',').map(x => x.trim().toLowerCase()).filter(x => x.length > 1))].slice(0, 200);
+  try { await updateDoc(D('dc_servers', curSrv.id), { badwords: w }); toast('🚫 Uloženo (' + w.length + ' slov)'); closeModal(); } catch (e) { fail(e); }
+}
 $('profBtn').onclick = () => {
   modal(`<h2>Tvůj profil</h2><label>Přezdívka</label><input id="pname" maxlength="24" value="${esc(myProfile?.name)}"><label>Barva</label><div class="emo" id="pcol">${COLORS.map(c => `<button data-c="${c}" class="${c === myProfile?.color ? 'on' : ''}" style="background:${c};width:34px;height:34px"></button>`).join('')}</div><div class="row"><button class="btn gray" id="mx">Zrušit</button><button class="btn" id="pok">Uložit</button></div>`, () => {
     let col = myProfile?.color;
@@ -466,7 +488,14 @@ $('profBtn').onclick = () => {
 };
 
 /* ---------- DEV MENU ---------- */
-function roleTag(uid) { if (users[uid]?.owner) return '<span class="tag">OWNER</span>'; if (devs[uid]) return '<span class="tag" style="background:#5865f2;color:#fff">DEV</span>'; return ''; }
+const isMod = uid => !!(curSrv && (curSrv.mods || []).includes(uid));
+const canModerate = () => !!(curSrv && (curSrv.owner === me.uid || isMod(me.uid) || isDev()));
+function censor(t) {
+  const w = (curSrv?.badwords || []).filter(Boolean); if (!w.length) return t;
+  const re = new RegExp('(' + w.map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')', 'gi');
+  return t.replace(re, m => m[0] + '*'.repeat(Math.max(m.length - 1, 1)));
+}
+function roleTag(uid) { if (users[uid]?.owner) return '<span class="tag">OWNER</span>'; if (devs[uid]) return '<span class="tag" style="background:#5865f2;color:#fff">DEV</span>'; if (isMod(uid)) return '<span class="tag" style="background:#23a55a;color:#fff">MOD</span>'; return ''; }
 function applyGlobals() {
   if (!me) return;
   if (isOwner() && !users[me.uid]?.owner) updateDoc(D('dc_users', me.uid), { owner: true }).catch(()=>{});
