@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Chat 💬</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg0:#1e1f22;--bg1:#2b2d31;--bg2:#313338;--bg3:#383a40;--tx:#dbdee1;--mut:#949ba4;--acc:#5865f2;--ok:#23a55a;--bad:#f23f43}
+html,body{height:100%;background:var(--bg2);color:var(--tx);font-family:"gg sans","Segoe UI",Roboto,Arial,sans-serif;font-size:15px}
+button{font:inherit;cursor:pointer;border:0}
+input,textarea{font:inherit;color:var(--tx);background:var(--bg0);border:0;border-radius:6px;padding:10px;outline:none;width:100%}
+.hidden{display:none!important}
+/* login */
+#login{display:flex;align-items:center;justify-content:center;height:100%;background:linear-gradient(135deg,#404eed,#1e1f22)}
+.card{background:var(--bg2);padding:28px;border-radius:10px;width:min(420px,92vw);box-shadow:0 8px 30px #0008}
+.card h1{text-align:center;margin-bottom:6px}.card p{text-align:center;color:var(--mut);margin-bottom:18px}
+.card label{display:block;font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;margin:12px 0 6px}
+.btn{background:var(--acc);color:#fff;padding:11px 16px;border-radius:6px;font-weight:600;width:100%;margin-top:18px}
+.btn:hover{filter:brightness(1.1)}.link{color:#00a8fc;background:none;margin-top:12px;font-size:14px}
+.err{color:var(--bad);font-size:13px;margin-top:10px;min-height:16px}
+/* app */
+#app{display:flex;height:100%}
+#servers{width:72px;background:var(--bg0);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:8px;overflow-y:auto}
+.srv{width:48px;height:48px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:22px;transition:.15s;position:relative;color:var(--tx)}
+.srv:hover,.srv.on{border-radius:16px;background:var(--acc)}
+.srv.add{color:var(--ok);font-size:26px}.srv.add:hover{background:var(--ok);color:#fff}
+.sep{width:32px;height:2px;background:var(--bg3)}
+#side{width:240px;background:var(--bg1);display:flex;flex-direction:column}
+#srvName{padding:14px 16px;font-weight:700;border-bottom:1px solid #0003;display:flex;justify-content:space-between;align-items:center;gap:6px}
+#srvName button{background:none;color:var(--mut);font-size:16px}
+#chans{flex:1;overflow-y:auto;padding:10px 8px}
+.cat{font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;padding:10px 8px 4px;display:flex;justify-content:space-between}
+.cat button{background:none;color:var(--mut);font-size:18px;line-height:1}
+.ch{padding:7px 8px;border-radius:5px;color:var(--mut);cursor:pointer;display:flex;gap:6px;align-items:center}
+.ch:hover{background:var(--bg3);color:var(--tx)}.ch.on{background:#404249;color:#fff}
+#me{background:#232428;padding:9px 10px;display:flex;align-items:center;gap:8px}
+#me .nm{flex:1;font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#me button{background:none;color:var(--mut);font-size:17px}
+.av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;flex-shrink:0;position:relative}
+.dot{position:absolute;right:-2px;bottom:-2px;width:12px;height:12px;border-radius:50%;border:3px solid var(--bg1);background:#80848e}.dot.on{background:var(--ok)}
+#main{flex:1;display:flex;flex-direction:column;min-width:0}
+#top{height:50px;padding:0 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #0003;font-weight:700}
+#top .sp{flex:1}#top button{background:none;color:var(--mut);font-size:19px}
+#menuBtn{display:none}
+#msgs{flex:1;overflow-y:auto;padding:16px 0}
+.msg{display:flex;gap:14px;padding:4px 16px;position:relative}
+.msg:hover{background:#2e3035}
+.msg.cont{padding-top:1px}.msg.cont .av{visibility:hidden;height:0}
+.msg .bd{min-width:0;flex:1}
+.msg .hd{display:flex;gap:8px;align-items:baseline}.msg .au{font-weight:600}
+.msg .tm{font-size:11px;color:var(--mut)}
+.msg .tx{white-space:pre-wrap;word-wrap:break-word;line-height:1.38}
+.msg .tx .ed{font-size:10px;color:var(--mut)}
+.msg .acts{position:absolute;right:14px;top:-10px;background:var(--bg2);border:1px solid #0004;border-radius:6px;display:none}
+.msg:hover .acts{display:flex}.acts button{background:none;padding:4px 7px;color:var(--mut)}.acts button:hover{color:#fff}
+.rx{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.rx span{background:var(--bg3);border-radius:8px;padding:2px 7px;font-size:13px;cursor:pointer;border:1px solid transparent}
+.rx span.mine{border-color:var(--acc);background:#3c4270}
+.welcome{padding:16px;color:var(--mut)}.welcome h2{color:var(--tx);font-size:28px;margin-bottom:6px}
+#composer{padding:0 16px 20px}
+#composer form{display:flex;background:var(--bg3);border-radius:8px;align-items:flex-end}
+#composer textarea{background:none;resize:none;max-height:150px;padding:12px}
+#composer button{background:none;color:var(--mut);padding:12px;font-size:18px}
+#typing{height:18px;font-size:12px;color:var(--mut);padding:2px 18px}
+#members{width:230px;background:var(--bg1);overflow-y:auto;padding:12px 8px}
+.mem{display:flex;gap:10px;align-items:center;padding:6px 8px;border-radius:5px}
+.mem:hover{background:var(--bg3)}.mem .nm{font-size:14px}.mem.off{opacity:.45}
+.crown{font-size:12px}
+/* modal */
+#modal{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;z-index:50}
+#modal .card h2{margin-bottom:6px;text-align:center}
+.emo{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.emo button{background:var(--bg3);border-radius:6px;font-size:20px;padding:5px 8px}.emo button.on{background:var(--acc)}
+.row{display:flex;gap:8px}.row .btn{flex:1}.btn.gray{background:var(--bg3)}
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#111214;padding:10px 16px;border-radius:8px;z-index:60;opacity:0;transition:.25s;pointer-events:none}
+#toast.show{opacity:1}
+#empty{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--mut);text-align:center;padding:20px}
+@media(max-width:820px){
+ #members{display:none}#menuBtn{display:block}
+ #servers,#side{position:fixed;top:0;bottom:0;z-index:30;transition:transform .2s}
+ #servers{left:0}#side{left:72px}
+ #app.closed #servers,#app.closed #side{transform:translateX(-320px)}
+ #app.membersOpen #members{display:block;position:fixed;right:0;top:0;bottom:0;z-index:30}
+}
+</style>
+</head>
+<body>
+<div id="login">
+ <div class="card">
+  <h1>Vítej! 👋</h1><p id="lsub">Přihlas se a pokecej s kámoši</p>
+  <div id="nameWrap" class="hidden"><label>Přezdívka</label><input id="lname" maxlength="24" placeholder="Jak ti máme říkat?"></div>
+  <label>E-mail</label><input id="lemail" type="email" autocomplete="email">
+  <label>Heslo</label><input id="lpass" type="password" autocomplete="current-password">
+  <button class="btn" id="lgo">Přihlásit se</button>
+  <div class="err" id="lerr"></div>
+  <button class="link" id="lswitch">Nemáš účet? Zaregistruj se</button>
+ </div>
+</div>
+
+<div id="app" class="hidden closed">
+ <nav id="servers"></nav>
+ <aside id="side">
+  <div id="srvName"><span id="srvTitle">Server</span><span><button id="inviteBtn" title="Pozvat">👥</button><button id="srvSet" title="Nastavení">⚙️</button></span></div>
+  <div id="chans"></div>
+  <div id="me"><div class="av" id="meAv"></div><span class="nm" id="meName"></span><button id="profBtn" title="Profil">✏️</button><button id="outBtn" title="Odhlásit">🚪</button></div>
+ </aside>
+ <main id="main">
+  <div id="top"><button id="menuBtn">☰</button><span id="chTitle"># </span><span class="sp"></span><button id="memBtn" title="Členové">👥</button></div>
+  <div id="empty" class="hidden"><div style="font-size:56px">💬</div><h2 style="color:var(--tx)">Zatím nejsi na žádném serveru</h2><p>Vytvoř si vlastní, nebo se připoj kódem od kámoše.</p><button class="btn" style="width:auto" id="emptyAdd">➕ Vytvořit / připojit</button></div>
+  <div id="msgs"></div>
+  <div id="typing"></div>
+  <div id="composer"><form id="form"><textarea id="inp" rows="1" maxlength="2000" placeholder="Napiš zprávu"></textarea><button type="submit">➤</button></form></div>
+ </main>
+ <aside id="members"></aside>
+</div>
+
+<div id="modal" class="hidden"><div class="card" id="mcard"></div></div>
+<div id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, collection, doc, setDoc, addDoc, getDoc, updateDoc, deleteDoc, onSnapshot, query, where, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+const firebaseConfig = {"apiKey": "AIzaSyBovG00qfDWUBcS9pJlS_FwOH4etF9Sv0Y", "authDomain": "flex-bubble.firebaseapp.com", "projectId": "flex-bubble", "storageBucket": "flex-bubble.firebasestorage.app", "messagingSenderId": "171220277752", "appId": "1:171220277752:web:d5d68647bf1759db58de0d"};
+const APP = 'flex-bubble-prod-v10';
+const fb = initializeApp(firebaseConfig, 'chat');
+const auth = getAuth(fb), db = getFirestore(fb);
+const C = n => collection(db, 'artifacts', APP, 'public', 'data', n);
+const D = (n, id) => doc(db, 'artifacts', APP, 'public', 'data', n, id);
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const COLORS = ['#5865f2','#eb459e','#57f287','#fee75c','#ed4245','#f47b67','#3ba55c','#9b59b6','#e67e22','#1abc9c'];
+const EMOJI = ['💬','🎮','🔥','⚡','🐺','🚀','🎵','⛏️','🍕','👾','🌙','🌈','⚽','📚','😎','🐱'];
+const REACT = ['👍','😂','❤️','🔥','😮','😢'];
+const toast = t => { const e = $('toast'); e.textContent = t; e.classList.add('show'); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove('show'), 2200); };
+const fail = e => { console.error(e); toast('❌ Nepovedlo se: ' + (e.code || e.message || e)); };
+
+let me = null, myProfile = null, users = {}, servers = [], curSrv = null, channels = [], curCh = null;
+let unsub = { srv: null, ch: null, msg: null, users: null, typing: null };
+let regMode = false;
+
+/* ---------- LOGIN ---------- */
+$('lswitch').onclick = () => {
+  regMode = !regMode;
+  $('nameWrap').classList.toggle('hidden', !regMode);
+  $('lgo').textContent = regMode ? 'Vytvořit účet' : 'Přihlásit se';
+  $('lsub').textContent = regMode ? 'Vytvoř si účet zdarma' : 'Přihlas se a pokecej s kámoši';
+  $('lswitch').textContent = regMode ? 'Už máš účet? Přihlas se' : 'Nemáš účet? Zaregistruj se';
+  $('lerr').textContent = '';
+};
+const authErr = c => ({'auth/invalid-credential':'Špatný e-mail nebo heslo','auth/wrong-password':'Špatné heslo','auth/user-not-found':'Účet neexistuje','auth/email-already-in-use':'Tenhle e-mail už má účet','auth/weak-password':'Heslo musí mít aspoň 6 znaků','auth/invalid-email':'Neplatný e-mail','auth/too-many-requests':'Moc pokusů, zkus to za chvíli'}[c] || c);
+async function doLogin() {
+  const em = $('lemail').value.trim(), pw = $('lpass').value, nm = $('lname').value.trim();
+  $('lerr').textContent = '';
+  if (regMode && nm.length < 2) { $('lerr').textContent = 'Přezdívka musí mít aspoň 2 znaky'; return; }
+  try {
+    if (regMode) {
+      const cr = await createUserWithEmailAndPassword(auth, em, pw);
+      await setDoc(D('dc_users', cr.user.uid), { name: nm, color: COLORS[Math.floor(Math.random()*COLORS.length)], seen: Date.now() });
+    } else await signInWithEmailAndPassword(auth, em, pw);
+  } catch (e) { $('lerr').textContent = authErr(e.code); }
+}
+$('lgo').onclick = doLogin;
+$('lpass').onkeydown = e => { if (e.key === 'Enter') doLogin(); };
+$('outBtn').onclick = () => signOut(auth);
+
+onAuthStateChanged(auth, async u => {
+  Object.values(unsub).forEach(f => f && f());
+  if (!u || u.isAnonymous) { me = null; $('login').classList.remove('hidden'); $('app').classList.add('hidden'); return; }
+  me = u;
+  const snap = await getDoc(D('dc_users', u.uid));
+  if (!snap.exists()) {
+    const nm = (u.email || 'uživatel').split('@')[0].slice(0, 24);
+    await setDoc(D('dc_users', u.uid), { name: nm, color: COLORS[Math.floor(Math.random()*COLORS.length)], seen: Date.now() });
+  }
+  $('login').classList.add('hidden'); $('app').classList.remove('hidden');
+  startApp();
+});
+
+/* ---------- PRESENCE ---------- */
+const online = u => u && Date.now() - (u.seen || 0) < 120000;
+setInterval(() => { if (me) updateDoc(D('dc_users', me.uid), { seen: Date.now() }).catch(()=>{}); }, 60000);
+document.addEventListener('visibilitychange', () => { if (me && !document.hidden) updateDoc(D('dc_users', me.uid), { seen: Date.now() }).catch(()=>{}); });
+
+function avatar(uid, size) {
+  const u = users[uid] || { name: '?', color: '#555' };
+  const s = size ? `width:${size}px;height:${size}px;` : '';
+  return `<div class="av" style="${s}background:${esc(u.color)}">${esc((u.name||'?')[0].toUpperCase())}</div>`;
+}
+
+/* ---------- APP ---------- */
+function startApp() {
+  updateDoc(D('dc_users', me.uid), { seen: Date.now() }).catch(()=>{});
+  unsub.users = onSnapshot(C('dc_users'), s => {
+    users = {}; s.forEach(d => users[d.id] = d.data());
+    myProfile = users[me.uid];
+    if (myProfile) { $('meName').textContent = myProfile.name; $('meAv').outerHTML = avatar(me.uid).replace('class="av"', 'class="av" id="meAv"'); }
+    renderMembers(); renderMsgs();
+  });
+  unsub.srv = onSnapshot(query(C('dc_servers'), where('members', 'array-contains', me.uid)), s => {
+    servers = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (a.created || 0) - (b.created || 0));
+    if (curSrv && !servers.find(x => x.id === curSrv.id)) curSrv = null;
+    if (curSrv) curSrv = servers.find(x => x.id === curSrv.id);
+    const want = localStorage.getItem('dc_srv');
+    if (!curSrv && servers.length) selectServer((servers.find(x => x.id === want) || servers[0]).id);
+    renderServers();
+    if (!servers.length) showEmpty(true);
+  }, fail);
+  const hash = location.hash.match(/join=([\w-]+)/);
+  if (hash) { history.replaceState(null, '', location.pathname); joinServer(hash[1]); }
+}
+
+function showEmpty(on) {
+  $('empty').classList.toggle('hidden', !on);
+  ['msgs', 'composer', 'typing'].forEach(i => $(i).classList.toggle('hidden', on));
+  if (on) { $('srvTitle').textContent = 'Žádný server'; $('chans').innerHTML = ''; $('members').innerHTML = ''; $('chTitle').textContent = ''; $('app').classList.remove('closed'); }
+}
+
+function renderServers() {
+  $('servers').innerHTML = servers.map(s => `<button class="srv ${curSrv && s.id === curSrv.id ? 'on' : ''}" data-id="${s.id}" title="${esc(s.name)}">${esc(s.icon || '💬')}</button>`).join('')
+    + (servers.length ? '<div class="sep"></div>' : '') + '<button class="srv add" id="addSrv" title="Přidat server">＋</button>';
+  $('servers').querySelectorAll('.srv[data-id]').forEach(b => b.onclick = () => selectServer(b.dataset.id));
+  $('addSrv').onclick = addServerModal;
+}
+
+function selectServer(id) {
+  curSrv = servers.find(x => x.id === id); if (!curSrv) return;
+  localStorage.setItem('dc_srv', id); showEmpty(false);
+  $('srvTitle').textContent = curSrv.name; renderServers(); renderMembers();
+  unsub.ch && unsub.ch();
+  curCh = null;
+  unsub.ch = onSnapshot(query(C('dc_channels'), where('srv', '==', id)), s => {
+    channels = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (a.created || 0) - (b.created || 0));
+    renderChannels();
+    if (!curCh || !channels.find(c => c.id === curCh.id)) {
+      const want = localStorage.getItem('dc_ch_' + id);
+      if (channels.length) selectChannel((channels.find(c => c.id === want) || channels[0]).id);
+      else { curCh = null; $('msgs').innerHTML = ''; $('chTitle').textContent = ''; }
+    }
+  }, fail);
+}
+
+function renderChannels() {
+  const owner = curSrv && curSrv.owner === me.uid;
+  $('chans').innerHTML = `<div class="cat"><span>Textové kanály</span>${owner ? '<button id="addCh" title="Nový kanál">＋</button>' : ''}</div>`
+    + channels.map(c => `<div class="ch ${curCh && c.id === curCh.id ? 'on' : ''}" data-id="${c.id}"><span>#</span>${esc(c.name)}</div>`).join('');
+  $('chans').querySelectorAll('.ch').forEach(e => e.onclick = () => { selectChannel(e.dataset.id); $('app').classList.add('closed'); });
+  if (owner) $('addCh').onclick = addChannelModal;
+}
+
+let msgs = [];
+function selectChannel(id) {
+  curCh = channels.find(c => c.id === id); if (!curCh) return;
+  localStorage.setItem('dc_ch_' + curSrv.id, id);
+  $('chTitle').textContent = '# ' + curCh.name; $('inp').placeholder = 'Napiš do #' + curCh.name;
+  renderChannels();
+  unsub.msg && unsub.msg(); unsub.typing && unsub.typing();
+  msgs = []; renderMsgs(true);
+  unsub.msg = onSnapshot(query(C('dc_messages'), where('ch', '==', id)), s => {
+    const atBottom = $('msgs').scrollHeight - $('msgs').scrollTop - $('msgs').clientHeight < 120;
+    msgs = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (a.t || 0) - (b.t || 0)).slice(-300);
+    renderMsgs(atBottom);
+  }, fail);
+  unsub.typing = onSnapshot(D('dc_typing', id), s => {
+    const d = s.exists() ? s.data() : {};
+    const who = Object.entries(d).filter(([u, t]) => u !== me.uid && Date.now() - t < 5000).map(([u]) => users[u]?.name).filter(Boolean);
+    $('typing').textContent = who.length ? `${who.join(', ')} ${who.length > 1 ? 'píšou' : 'píše'}…` : '';
+  });
+}
+
+const fmtTime = t => { const d = new Date(t), n = new Date(); const hm = d.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' }); return d.toDateString() === n.toDateString() ? 'Dnes v ' + hm : d.toLocaleDateString('cs-CZ') + ' ' + hm; };
+function linkify(s) { return esc(s).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color:#00a8fc">$1</a>'); }
+
+function renderMsgs(scroll) {
+  if (!curCh) return;
+  const box = $('msgs');
+  let html = `<div class="welcome"><h2># ${esc(curCh.name)}</h2>Tohle je začátek kanálu #${esc(curCh.name)} 🎉</div>`;
+  let prev = null;
+  for (const m of msgs) {
+    const u = users[m.uid] || { name: 'Neznámý', color: '#777' };
+    const cont = prev && prev.uid === m.uid && m.t - prev.t < 300000;
+    const mine = m.uid === me.uid, canDel = mine || (curSrv && curSrv.owner === me.uid);
+    const rx = m.rx || {};
+    const rxHtml = Object.entries(rx).filter(([, a]) => a && a.length).map(([e, a]) => `<span data-e="${e}" class="${a.includes(me.uid) ? 'mine' : ''}">${e} ${a.length}</span>`).join('');
+    html += `<div class="msg ${cont ? 'cont' : ''}" data-id="${m.id}">${avatar(m.uid)}<div class="bd">`
+      + (cont ? '' : `<div class="hd"><span class="au" style="color:${esc(u.color)}">${esc(u.name)}</span>${curSrv.owner === m.uid ? '<span class="crown" title="Majitel">👑</span>' : ''}<span class="tm">${fmtTime(m.t)}</span></div>`)
+      + `<div class="tx">${linkify(m.text)}${m.edited ? ' <span class="ed">(upraveno)</span>' : ''}</div>`
+      + (rxHtml ? `<div class="rx">${rxHtml}</div>` : '')
+      + `</div><div class="acts"><button data-a="react" title="Reakce">😀</button>${mine ? '<button data-a="edit" title="Upravit">✏️</button>' : ''}${canDel ? '<button data-a="del" title="Smazat">🗑️</button>' : ''}</div></div>`;
+    prev = m;
+  }
+  box.innerHTML = html;
+  box.querySelectorAll('.msg').forEach(el => {
+    const m = msgs.find(x => x.id === el.dataset.id);
+    el.querySelectorAll('.acts button').forEach(b => b.onclick = () => msgAction(b.dataset.a, m));
+    el.querySelectorAll('.rx span').forEach(s => s.onclick = () => toggleReact(m, s.dataset.e));
+  });
+  if (scroll) box.scrollTop = box.scrollHeight;
+}
+
+async function toggleReact(m, e) {
+  const has = (m.rx?.[e] || []).includes(me.uid);
+  try { await updateDoc(D('dc_messages', m.id), { ['rx.' + e]: has ? arrayRemove(me.uid) : arrayUnion(me.uid) }); } catch (er) { fail(er); }
+}
+function msgAction(a, m) {
+  if (a === 'del') { if (confirm('Smazat zprávu?')) deleteDoc(D('dc_messages', m.id)).catch(fail); }
+  if (a === 'react') modal(`<h2>Reakce</h2><div class="emo" style="justify-content:center">${REACT.map(e => `<button data-e="${e}">${e}</button>`).join('')}</div><button class="btn gray" id="mx">Zavřít</button>`, () => {
+    $('mcard').querySelectorAll('.emo button').forEach(b => b.onclick = () => { toggleReact(m, b.dataset.e); closeModal(); });
+  });
+  if (a === 'edit') modal(`<h2>Upravit zprávu</h2><textarea id="edt" rows="4" maxlength="2000">${esc(m.text)}</textarea><div class="row"><button class="btn gray" id="mx">Zrušit</button><button class="btn" id="mok">Uložit</button></div>`, () => {
+    $('mok').onclick = async () => { const t = $('edt').value.trim(); if (!t) return; try { await updateDoc(D('dc_messages', m.id), { text: t, edited: true }); closeModal(); } catch (e) { fail(e); } };
+  });
+}
+
+/* ---------- SEND ---------- */
+const inp = $('inp');
+let lastTyping = 0;
+inp.addEventListener('input', () => {
+  inp.style.height = 'auto'; inp.style.height = Math.min(inp.scrollHeight, 150) + 'px';
+  if (curCh && Date.now() - lastTyping > 3000) { lastTyping = Date.now(); setDoc(D('dc_typing', curCh.id), { [me.uid]: Date.now() }, { merge: true }).catch(()=>{}); }
+});
+inp.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('form').requestSubmit(); } });
+let lastSend = 0;
+$('form').onsubmit = async e => {
+  e.preventDefault();
+  const t = inp.value.trim(); if (!t || !curCh) return;
+  if (Date.now() - lastSend < 700) { toast('🐢 Pomaleji'); return; }
+  lastSend = Date.now(); inp.value = ''; inp.style.height = 'auto';
+  try {
+    await addDoc(C('dc_messages'), { ch: curCh.id, srv: curSrv.id, uid: me.uid, text: t.slice(0, 2000), t: Date.now() });
+    setDoc(D('dc_typing', curCh.id), { [me.uid]: 0 }, { merge: true }).catch(()=>{});
+  } catch (er) { inp.value = t; fail(er); }
+};
+
+/* ---------- MEMBERS ---------- */
+function renderMembers() {
+  if (!curSrv) return;
+  const list = (curSrv.members || []).map(id => ({ id, u: users[id] || { name: '…' } }));
+  const on = list.filter(x => online(x.u)), off = list.filter(x => !online(x.u));
+  const row = x => `<div class="mem ${online(x.u) ? '' : 'off'}"><div style="position:relative">${avatar(x.id, 32)}<span class="dot ${online(x.u) ? 'on' : ''}"></span></div><span class="nm" style="color:${esc(x.u.color)}">${esc(x.u.name)}</span>${curSrv.owner === x.id ? '<span class="crown">👑</span>' : ''}</div>`;
+  $('members').innerHTML = `<div class="cat">Online — ${on.length}</div>${on.map(row).join('')}<div class="cat">Offline — ${off.length}</div>${off.map(row).join('')}`;
+}
+setInterval(renderMembers, 30000);
+
+/* ---------- MODALS ---------- */
+function modal(html, after) { $('mcard').innerHTML = html; $('modal').classList.remove('hidden'); const x = $('mx'); if (x) x.onclick = closeModal; after && after(); }
+function closeModal() { $('modal').classList.add('hidden'); }
+$('modal').onclick = e => { if (e.target.id === 'modal') closeModal(); };
+
+function emojiPicker(sel) { return `<div class="emo" id="emo">${EMOJI.map(e => `<button data-e="${e}" class="${e === sel ? 'on' : ''}">${e}</button>`).join('')}</div>`; }
+function bindEmoji() { let pick = $('emo').querySelector('.on')?.dataset.e; $('emo').querySelectorAll('button').forEach(b => b.onclick = () => { $('emo').querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on'); pick = b.dataset.e; }); return () => pick; }
+
+function addServerModal() {
+  modal(`<h2>Přidat server</h2><p>Vytvoř vlastní, nebo se připoj kódem</p>
+   <label>Název serveru</label><input id="sname" maxlength="30" placeholder="Server kámošů">
+   <label>Ikona</label>${emojiPicker('💬')}
+   <button class="btn" id="screate">Vytvořit server</button>
+   <label style="margin-top:22px">Kód pozvánky</label><input id="scode" placeholder="např. aB3xY9...">
+   <button class="btn gray" id="sjoin">Připojit se</button><button class="link" id="mx">Zavřít</button>`, () => {
+    const getE = bindEmoji();
+    $('screate').onclick = async () => {
+      const n = $('sname').value.trim(); if (n.length < 2) { toast('Napiš název'); return; }
+      try {
+        const now = Date.now();
+        const r = await addDoc(C('dc_servers'), { name: n, icon: getE() || '💬', owner: me.uid, members: [me.uid], created: now });
+        await addDoc(C('dc_channels'), { srv: r.id, name: 'obecné', created: now });
+        await addDoc(C('dc_channels'), { srv: r.id, name: 'memes', created: now + 1 });
+        closeModal(); localStorage.setItem('dc_srv', r.id); setTimeout(() => selectServer(r.id), 400); toast('🎉 Server vytvořen');
+      } catch (e) { fail(e); }
+    };
+    $('sjoin').onclick = () => { const c = $('scode').value.trim().replace(/.*join=/, ''); if (c) joinServer(c); };
+  });
+}
+$('emptyAdd').onclick = addServerModal;
+
+async function joinServer(code) {
+  try {
+    const s = await getDoc(D('dc_servers', code));
+    if (!s.exists()) { toast('❌ Server s tímhle kódem neexistuje'); return; }
+    if ((s.data().banned || []).includes(me.uid)) { toast('⛔ Na tomhle serveru máš ban'); return; }
+    await updateDoc(D('dc_servers', code), { members: arrayUnion(me.uid) });
+    closeModal(); localStorage.setItem('dc_srv', code); setTimeout(() => selectServer(code), 400); toast('✅ Připojeno k ' + s.data().name);
+  } catch (e) { fail(e); }
+}
+
+function addChannelModal() {
+  modal(`<h2>Nový kanál</h2><label>Název kanálu</label><input id="cname" maxlength="24" placeholder="hry"><div class="row"><button class="btn gray" id="mx">Zrušit</button><button class="btn" id="cok">Vytvořit</button></div>`, () => {
+    $('cok').onclick = async () => {
+      const n = $('cname').value.trim().toLowerCase().replace(/\s+/g, '-'); if (!n) return;
+      try { await addDoc(C('dc_channels'), { srv: curSrv.id, name: n, created: Date.now() }); closeModal(); } catch (e) { fail(e); }
+    };
+  });
+}
+
+$('inviteBtn').onclick = () => {
+  if (!curSrv) return;
+  const link = location.origin + location.pathname + '#join=' + curSrv.id;
+  modal(`<h2>Pozvi kámoše 👥</h2><p>Pošli jim odkaz nebo kód</p><label>Odkaz</label><input id="ilink" readonly value="${esc(link)}"><label>Kód</label><input readonly value="${esc(curSrv.id)}"><div class="row"><button class="btn gray" id="mx">Zavřít</button><button class="btn" id="icopy">Kopírovat odkaz</button></div>`, () => {
+    $('icopy').onclick = () => { navigator.clipboard.writeText(link).then(() => toast('📋 Zkopírováno')).catch(() => { $('ilink').select(); toast('Zkopíruj ručně'); }); };
+  });
+};
+
+$('srvSet').onclick = () => {
+  if (!curSrv) return;
+  const owner = curSrv.owner === me.uid;
+  if (!owner) {
+    modal(`<h2>${esc(curSrv.name)}</h2><button class="btn" style="background:var(--bad)" id="leave">Opustit server</button><button class="link" id="mx">Zavřít</button>`, () => {
+      $('leave').onclick = async () => { if (!confirm('Opravdu opustit?')) return; try { await updateDoc(D('dc_servers', curSrv.id), { members: arrayRemove(me.uid) }); curSrv = null; closeModal(); } catch (e) { fail(e); } };
+    });
+    return;
+  }
+  const others = (curSrv.members || []).filter(id => id !== me.uid);
+  modal(`<h2>Nastavení serveru</h2>
+   <label>Název</label><input id="ename" maxlength="30" value="${esc(curSrv.name)}">
+   <label>Ikona</label>${emojiPicker(curSrv.icon)}
+   <button class="btn" id="esave">Uložit</button>
+   <label style="margin-top:20px">Kanály</label>${channels.map(c => `<div class="ch" style="justify-content:space-between"># ${esc(c.name)}<button class="link" style="margin:0;color:var(--bad)" data-c="${c.id}">Smazat</button></div>`).join('')}
+   <label style="margin-top:20px">Členové</label>${others.length ? others.map(id => `<div class="ch" style="justify-content:space-between">${esc(users[id]?.name || '…')}<span><button class="link" style="margin:0;color:var(--bad)" data-k="${id}">Vyhodit</button> <button class="link" style="margin:0;color:var(--bad)" data-b="${id}">Ban</button></span></div>`).join('') : '<p style="text-align:left">Zatím nikdo další</p>'}
+   <button class="btn" style="background:var(--bad)" id="edel">Smazat server</button><button class="link" id="mx">Zavřít</button>`, () => {
+    const getE = bindEmoji();
+    $('esave').onclick = async () => { try { await updateDoc(D('dc_servers', curSrv.id), { name: $('ename').value.trim() || curSrv.name, icon: getE() || curSrv.icon }); toast('✅ Uloženo'); closeModal(); } catch (e) { fail(e); } };
+    $('mcard').querySelectorAll('[data-c]').forEach(b => b.onclick = async () => { if (channels.length < 2) { toast('Server musí mít aspoň 1 kanál'); return; } if (confirm('Smazat kanál?')) { await deleteDoc(D('dc_channels', b.dataset.c)).catch(fail); closeModal(); } });
+    $('mcard').querySelectorAll('[data-k]').forEach(b => b.onclick = async () => { await updateDoc(D('dc_servers', curSrv.id), { members: arrayRemove(b.dataset.k) }).catch(fail); closeModal(); toast('👋 Vyhozen'); });
+    $('mcard').querySelectorAll('[data-b]').forEach(b => b.onclick = async () => { await updateDoc(D('dc_servers', curSrv.id), { members: arrayRemove(b.dataset.b), banned: arrayUnion(b.dataset.b) }).catch(fail); closeModal(); toast('⛔ Zabanován'); });
+    $('edel').onclick = async () => { if (!confirm('Opravdu smazat celý server?')) return; try { for (const c of channels) await deleteDoc(D('dc_channels', c.id)); await deleteDoc(D('dc_servers', curSrv.id)); curSrv = null; closeModal(); toast('🗑️ Server smazán'); } catch (e) { fail(e); } };
+  });
+};
+
+$('profBtn').onclick = () => {
+  modal(`<h2>Tvůj profil</h2><label>Přezdívka</label><input id="pname" maxlength="24" value="${esc(myProfile?.name)}"><label>Barva</label><div class="emo" id="pcol">${COLORS.map(c => `<button data-c="${c}" class="${c === myProfile?.color ? 'on' : ''}" style="background:${c};width:34px;height:34px"></button>`).join('')}</div><div class="row"><button class="btn gray" id="mx">Zrušit</button><button class="btn" id="pok">Uložit</button></div>`, () => {
+    let col = myProfile?.color;
+    $('pcol').querySelectorAll('button').forEach(b => b.onclick = () => { $('pcol').querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on'); col = b.dataset.c; });
+    $('pok').onclick = async () => { const n = $('pname').value.trim(); if (n.length < 2) { toast('Aspoň 2 znaky'); return; } try { await updateDoc(D('dc_users', me.uid), { name: n, color: col }); closeModal(); toast('✅ Uloženo'); } catch (e) { fail(e); } };
+  });
+};
+
+$('menuBtn').onclick = () => $('app').classList.toggle('closed');
+$('memBtn').onclick = () => $('app').classList.toggle('membersOpen');
+$('main').addEventListener('click', e => { if (e.target.id !== 'menuBtn' && innerWidth <= 820) $('app').classList.add('closed'); });
+</script>
+</body>
+</html>
