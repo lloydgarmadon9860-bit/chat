@@ -7,7 +7,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20rx%3D%2226%22%20fill%3D%22%23FC6A39%22/%3E%3Cg%20fill%3D%22%23fff%22%3E%3Ccircle%20cx%3D%2229%22%20cy%3D%2233%22%20r%3D%2211%22/%3E%3Ccircle%20cx%3D%2271%22%20cy%3D%2233%22%20r%3D%2211%22/%3E%3Cellipse%20cx%3D%2250%22%20cy%3D%2257%22%20rx%3D%2233%22%20ry%3D%2226%22/%3E%3C/g%3E%3Cg%20fill%3D%22%23FC6A39%22%3E%3Ccircle%20cx%3D%2237%22%20cy%3D%2254%22%20r%3D%225.5%22/%3E%3Ccircle%20cx%3D%2263%22%20cy%3D%2254%22%20r%3D%225.5%22/%3E%3Cpath%20d%3D%22M42%2063h16a8%209%200%200%201-16%200z%22/%3E%3C/g%3E%3Cpath%20d%3D%22M45.5%2068.5a4.5%203.5%200%200%201%209%200a4.5%203%200%200%201-9%200z%22%20fill%3D%22%23FEDACD%22/%3E%3C/svg%3E">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--rail:#121214;--side:#121214;--main:#0b0b0d;--card:#1a1a1e;--hover:#1f1f24;--sel:#26262c;--line:#26262b;--tx:#dbdee1;--mut:#949ba4;--dim:#6d6f78;--acc:#5865f2;--ok:#23a55a;--idle:#f0b232;--dnd:#f23f43;--bad:#f23f43}
+:root{--rail:#121214;--side:#121214;--main:#0b0b0d;--card:#1a1a1e;--hover:#1f1f24;--sel:#26262c;--line:#26262b;--tx:#dbdee1;--mut:#949ba4;--dim:#6d6f78;--acc:#FC6A39;--ok:#23a55a;--idle:#f0b232;--dnd:#f23f43;--bad:#f23f43}
 html,body{height:100%;background:var(--main);color:var(--tx);font-family:"gg sans","Noto Sans","Segoe UI",Roboto,Arial,sans-serif;font-size:15px;overflow:hidden}
 button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 input,textarea{font:inherit;color:var(--tx);background:#0e0e10;border:1px solid var(--line);border-radius:8px;padding:10px 12px;outline:none;width:100%}
@@ -365,7 +365,7 @@ const NAME_GRADS = ['linear-gradient(90deg,#ff73fa,#5865f2)', 'linear-gradient(9
 const REACT_PLUS = ['😍','🤔','😎','🥺','😡','👀','🙏','💯','🤣','🐺','⭐','✅','❌','🍕','👑','💎'];
 const monthKey = () => { const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1); };
 function tierOf(uid) { const n = users[uid]?.nitro; if (!n || !TIERS[n.tier]) return null; if (n.until !== -1 && n.until < Date.now()) return null; return n.tier; }
-const perk = (uid, k) => { const t = tierOf(uid); return !!(t && TIERS[t].perks.includes(k)); };
+const perk = (uid, k) => true; // Yaper: bez paywallu, vše zdarma pro všechny
 function nitroBadge(uid) { const t = tierOf(uid); return t ? `<span class="nitro-b" title="${TIERS[t].name}">${TIERS[t].emoji}</span>` : ''; }
 function nameStyle(uid) { const u = users[uid] || {}; return perk(uid, 'grad') && u.nameGrad ? `background-image:${u.nameGrad};color:${esc(u.color)}` : `color:${esc(u.color || '#fff')}`; }
 const nameCls = uid => perk(uid, 'grad') && users[uid]?.nameGrad ? 'gname' : '';
