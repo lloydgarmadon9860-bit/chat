@@ -895,13 +895,14 @@ function renderBots() {
   const all = Object.entries(users).filter(([, u]) => u.bot).sort((a, b) => (b[1].since || 0) - (a[1].since || 0));
   const mine = all.filter(([, u]) => u.botOwner === me.uid), other = all.filter(([, u]) => u.botOwner !== me.uid);
   const card = ([id, u]) => `<div class="frow" data-bu="${id}">${avatar(id, 40, true, 'var(--main)')}<div class="n"><b>${esc(u.name)} ${roleTag(id)} <span style="color:var(--dim);font-weight:400;font-size:13px">@${esc(u.handle || '')}</span></b><small>${esc((u.bio || '').slice(0, 90))}</small></div>
-    <button class="btn sm" data-bchat="${id}" style="width:auto;margin:0 4px 0 0;padding:7px 12px">💬 Psát</button>${u.botOwner === me.uid || isDev() ? `<button class="ib" data-bedit="${id}" title="Upravit">✏️</button><button class="ib" data-bdel="${id}" title="Smazat">🗑️</button>` : ''}</div>`;
+    <button class="btn sm" data-bchat="${id}" style="width:auto;margin:0 4px 0 0;padding:7px 12px">💬 Psát</button><button class="btn sm gray" data-badd="${id}" style="width:auto;margin:0 4px 0 0;padding:7px 12px">➕ Na server</button>${u.botOwner === me.uid || isDev() ? `<button class="ib" data-bedit="${id}" title="Upravit">✏️</button><button class="ib" data-bdel="${id}" title="Smazat">🗑️</button>` : ''}</div>`;
   let h = `<div class="flist" style="max-width:820px;margin:0 auto;width:100%"><div class="nhero" style="background:linear-gradient(135deg,#FC6A39,#a6339b)"><h1>🤖 AI boti</h1><p>Udělej si vlastního AI bota s vlastní povahou. Kolik chceš, zdarma. Piš mu do DM, nebo ho na serveru zmiň přes @jméno.</p><button class="btn" id="bNew" style="width:auto;margin-top:12px;background:#fff;color:#111">➕ Vytvořit bota</button></div>
     <div class="fh" style="margin-top:18px">TVOJI BOTI — ${mine.length}</div>${mine.map(card).join('') || '<p style="color:var(--mut);padding:10px 0">Zatím žádný. Vytvoř si prvního! 🐻</p>'}
     <div class="fh" style="margin-top:18px">BOTI OD OSTATNÍCH — ${other.length}</div>${other.map(card).join('') || '<p style="color:var(--mut);padding:10px 0">Zatím nikdo jiný bota nemá.</p>'}</div>`;
   $('msgs').innerHTML = h;
   $('bNew').onclick = () => botModal();
   $('msgs').querySelectorAll('[data-bchat]').forEach(b => b.onclick = () => startDm(b.dataset.bchat));
+  $('msgs').querySelectorAll('[data-badd]').forEach(b => b.onclick = () => addBotToServer(b.dataset.badd));
   $('msgs').querySelectorAll('[data-bedit]').forEach(b => b.onclick = () => botModal(b.dataset.bedit));
   $('msgs').querySelectorAll('[data-bdel]').forEach(b => b.onclick = async () => { const u = users[b.dataset.bdel]; if (!confirm(`Smazat bota ${u.name}?`)) return; try { await deleteDoc(D('dc_users', b.dataset.bdel)); if (u.handle) deleteDoc(D('dc_names', u.handle)).catch(() => {}); toast('🗑️ Bot smazán'); } catch (e) { fail(e); } });
 }
@@ -939,6 +940,17 @@ function botModal(id) {
         closeModal();
       } catch (e) { fail(e); }
     };
+  });
+}
+function addBotToServer(bid) {
+  const can = servers.filter(x => x.owner === me.uid || (x.mods || []).includes(me.uid) || isDev());
+  modal(`<button class="mx" id="mx">✕</button><h2>➕ Přidat ${esc(users[bid]?.name || 'bota')} na server</h2><p class="sub">Můžeš ho přidat na servery, kde jsi majitel nebo moderátor. Na serveru odpoví, když ho zmíníš přes @${esc(users[bid]?.handle || '')}.</p>
+    ${can.map(x => `<button class="opt" data-sv="${x.id}"><span class="e">${x.icon ? `<img src="${x.icon}" style="width:28px;height:28px;border-radius:50%">` : '🏠'}</span><span class="sp">${esc(x.name)}</span>${(x.members || []).includes(bid) ? '✅' : '›'}</button>`).join('') || '<p style="color:var(--mut);text-align:center">Nemáš žádný vlastní server. Vytvoř si ho tlačítkem ➕ vlevo.</p>'}`, () => {
+    $('mcard').querySelectorAll('[data-sv]').forEach(b => b.onclick = async () => {
+      const sv = servers.find(x => x.id === b.dataset.sv);
+      if ((sv.members || []).includes(bid)) { toast('Bot už na serveru je ✅'); return; }
+      try { await updateDoc(D('dc_servers', sv.id), { members: arrayUnion(bid) }); toast(`🤖 ${users[bid]?.name} je na serveru ${sv.name}!`); closeModal(); } catch (e) { fail(e); }
+    });
   });
 }
 function botFace(e, c) { const cv = document.createElement('canvas'); cv.width = cv.height = 128; const x = cv.getContext('2d'); x.fillStyle = c; x.fillRect(0, 0, 128, 128); x.font = '76px serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(e, 64, 70); return cv.toDataURL('image/png'); }
