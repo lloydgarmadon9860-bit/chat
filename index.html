@@ -214,6 +214,7 @@ label.l{display:block;font-size:12px;font-weight:700;color:var(--mut);text-trans
 .plan ul{list-style:none;flex:1;margin-bottom:14px}.plan li{padding:5px 0;font-size:14px;color:#cfd1d5}.plan li.no{color:var(--dim);text-decoration:line-through}
 .plan.cur{border-color:#ff73fa}
 .nhero{border-radius:16px;padding:28px;background:linear-gradient(135deg,#5865f2,#ff73fa);color:#fff}
+.fh{font-size:12px;font-weight:700;color:var(--mut);letter-spacing:.04em;padding:6px 2px 8px;border-bottom:1px solid var(--line);margin-bottom:6px}
 .nhero h1{font-size:32px}.nhero p{opacity:.95;margin-top:6px}
 /* calls */
 #callView{display:flex;flex-direction:column;background:#000;border-bottom:1px solid var(--line);min-height:0}
@@ -378,7 +379,7 @@ const banUntil = uid => bans[uid] === -1 ? Infinity : (bans[uid] || 0);
 const isBanned = uid => banUntil(uid) > Date.now();
 const myP = () => users[me?.uid] || {};
 const nameOf = uid => users[uid]?.name || 'Neznámý';
-function status(uid) { const u = users[uid]; if (!u || Date.now() - (u.seen || 0) > 150000) return 'offline'; const s = u.status || 'online'; return s === 'invisible' ? 'offline' : s; }
+function status(uid) { const u = users[uid]; if (u?.bot) return 'online'; if (!u || Date.now() - (u.seen || 0) > 150000) return 'offline'; const s = u.status || 'online'; return s === 'invisible' ? 'offline' : s; }
 const STATUS_TX = { online: 'Online', idle: 'Nepřítomen', dnd: 'Nerušit', offline: 'Offline', invisible: 'Neviditelný' };
 function avatar(uid, size = 40, withSt = false, ring = 'var(--side)') {
   const u = users[uid] || { name: '?', color: '#555' };
@@ -516,6 +517,7 @@ function renderSide() {
     $('findBtn').onclick = newDmModal;
     const pend = friends.filter(f => f.status === 'pending' && f.from !== me.uid).length;
     let h = `<div class="nav ${!curDm && homePage !== 'nitro' ? 'on' : ''}" id="navFr">${I.friends}<span class="sp">Přátelé</span>${pend ? `<span class="cnt">${pend}</span>` : ''}</div>`;
+    h += `<div class="nav ${homePage === 'bots' && !curDm ? 'on' : ''}" id="navBots"><span style="font-size:18px;width:20px;text-align:center">🤖</span><span class="sp">AI boti</span></div>`;
     h += `<div class="nav ${homePage === 'nitro' && !curDm ? 'on' : ''}" id="navNitro"><span style="font-size:18px;width:20px;text-align:center">💎</span><span class="sp">Nitro</span>${tierOf(me.uid) ? '' : '<span class="cnt" style="background:#ff73fa">ZDARMA</span>'}</div>`;
     h += `<div class="sec"><span>Přímé zprávy</span><button id="newDm" title="Vytvořit konverzaci">＋</button></div>`;
     for (const c of dms) {
@@ -524,6 +526,7 @@ function renderSide() {
     }
     if (!dms.length) h += `<p style="color:var(--dim);font-size:13px;padding:8px">Zatím žádné zprávy. Přidej si přátele a napiš jim 👋</p>`;
     $('sideBody').innerHTML = h;
+    $('navBots').onclick = () => { curDm = null; homePage = 'bots'; closeMobile(); stopChannel(); renderSide(); renderTop(); renderHomeMain(); renderRight(); };
     $('navNitro').onclick = () => { curDm = null; homePage = 'nitro'; closeMobile(); stopChannel(); renderSide(); renderTop(); renderHomeMain(); renderRight(); };
     $('navFr').onclick = () => { curDm = null; homePage = 'friends'; closeMobile(); stopChannel(); renderSide(); renderTop(); renderHomeMain(); renderRight(); };
     $('newDm').onclick = newDmModal;
@@ -607,7 +610,9 @@ function userPop(uid, ev) {
 /* ---------- TOP BAR ---------- */
 function renderTop() {
   let h = '<button class="tb" id="menuBtn">☰</button>';
-  if (view === 'home' && !curDm && homePage === 'nitro') {
+  if (view === 'home' && !curDm && homePage === 'bots') {
+    h += `<span class="tt">🤖 AI boti</span><span class="sp"></span>`;
+  } else if (view === 'home' && !curDm && homePage === 'nitro') {
     h += `<span class="tt">💎 Yaper Nitro</span><span class="sp"></span>`;
   } else if (view === 'home' && !curDm) {
     const pend = friends.filter(f => f.status === 'pending' && f.from !== me.uid).length;
@@ -653,6 +658,7 @@ function renderHomeMain() {
   setCenterMode(false);
   $('callView').classList.add('hidden');
   if (homePage === 'nitro') return renderNitro();
+  if (homePage === 'bots') return renderBots();
   const other = f => f.users.find(x => x !== me.uid);
   const ok = friends.filter(f => f.status === 'ok');
   const row = (uid, btns, sub) => `<div class="frow" data-u="${uid}">${avatar(uid, 36, true, 'var(--main)')}<div class="n"><b>${esc(nameOf(uid))} <span style="color:var(--dim);font-weight:400;font-size:13px">${esc(users[uid]?.handle || '')}</span></b><small>${sub || esc(users[uid]?.custom || STATUS_TX[status(uid)])}</small></div>${btns}</div>`;
@@ -815,7 +821,7 @@ function censor(t) {
   const re = new RegExp('(' + w.map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')', 'gi');
   return t.replace(re, m => m[0] + '*'.repeat(Math.max(m.length - 1, 1)));
 }
-function roleTag(uid) { let t = ''; if (users[uid]?.owner) t = '<span class="tag">OWNER</span>'; else if (devs[uid]) t = '<span class="tag dev">DEV</span>'; else if (view !== 'home' && isMod(uid)) t = '<span class="tag mod">MOD</span>'; return t + nitroBadge(uid); }
+function roleTag(uid) { let t = ''; if (users[uid]?.bot) return '<span class="tag" style="background:#FC6A39">🤖 BOT</span>'; if (users[uid]?.owner) t = '<span class="tag">OWNER</span>'; else if (devs[uid]) t = '<span class="tag dev">DEV</span>'; else if (view !== 'home' && isMod(uid)) t = '<span class="tag mod">MOD</span>'; return t + nitroBadge(uid); }
 
 function renderMsgs(scroll) {
   const c = curListen; if (!c || voiceView) return;
@@ -883,6 +889,88 @@ function msgAction(a, m) {
   });
 }
 
+/* ---------- AI BOTI ---------- */
+const BOT_FACES = ['🤖', '🐻', '🦊', '🐱', '🐸', '👽', '🧙', '🦖', '🐼', '👾'];
+function renderBots() {
+  const all = Object.entries(users).filter(([, u]) => u.bot).sort((a, b) => (b[1].since || 0) - (a[1].since || 0));
+  const mine = all.filter(([, u]) => u.botOwner === me.uid), other = all.filter(([, u]) => u.botOwner !== me.uid);
+  const card = ([id, u]) => `<div class="frow" data-bu="${id}">${avatar(id, 40, true, 'var(--main)')}<div class="n"><b>${esc(u.name)} ${roleTag(id)} <span style="color:var(--dim);font-weight:400;font-size:13px">@${esc(u.handle || '')}</span></b><small>${esc((u.bio || '').slice(0, 90))}</small></div>
+    <button class="btn sm" data-bchat="${id}" style="width:auto;margin:0 4px 0 0;padding:7px 12px">💬 Psát</button>${u.botOwner === me.uid || isDev() ? `<button class="ib" data-bedit="${id}" title="Upravit">✏️</button><button class="ib" data-bdel="${id}" title="Smazat">🗑️</button>` : ''}</div>`;
+  let h = `<div class="flist" style="max-width:820px;margin:0 auto;width:100%"><div class="nhero" style="background:linear-gradient(135deg,#FC6A39,#a6339b)"><h1>🤖 AI boti</h1><p>Udělej si vlastního AI bota s vlastní povahou. Kolik chceš, zdarma. Piš mu do DM, nebo ho na serveru zmiň přes @jméno.</p><button class="btn" id="bNew" style="width:auto;margin-top:12px;background:#fff;color:#111">➕ Vytvořit bota</button></div>
+    <div class="fh" style="margin-top:18px">TVOJI BOTI — ${mine.length}</div>${mine.map(card).join('') || '<p style="color:var(--mut);padding:10px 0">Zatím žádný. Vytvoř si prvního! 🐻</p>'}
+    <div class="fh" style="margin-top:18px">BOTI OD OSTATNÍCH — ${other.length}</div>${other.map(card).join('') || '<p style="color:var(--mut);padding:10px 0">Zatím nikdo jiný bota nemá.</p>'}</div>`;
+  $('msgs').innerHTML = h;
+  $('bNew').onclick = () => botModal();
+  $('msgs').querySelectorAll('[data-bchat]').forEach(b => b.onclick = () => startDm(b.dataset.bchat));
+  $('msgs').querySelectorAll('[data-bedit]').forEach(b => b.onclick = () => botModal(b.dataset.bedit));
+  $('msgs').querySelectorAll('[data-bdel]').forEach(b => b.onclick = async () => { const u = users[b.dataset.bdel]; if (!confirm(`Smazat bota ${u.name}?`)) return; try { await deleteDoc(D('dc_users', b.dataset.bdel)); if (u.handle) deleteDoc(D('dc_names', u.handle)).catch(() => {}); toast('🗑️ Bot smazán'); } catch (e) { fail(e); } });
+}
+function botModal(id) {
+  const u = id ? users[id] : {};
+  let face = u.face || BOT_FACES[0], color = u.color || '#FC6A39', avatarImg = u.avatar || '';
+  modal(`<button class="mx" id="mx">✕</button><h2>${id ? 'Upravit bota' : '🤖 Nový AI bot'}</h2><p class="sub">Popiš, jak se má chovat. Čím víc napíšeš, tím líp.</p>
+    <label class="l">Jméno</label><input id="bn" maxlength="32" value="${esc(u.name || '')}" placeholder="Např. Medvěd Bob">
+    <label class="l">Uživatelské jméno (pro @zmínku)</label><input id="bh" maxlength="24" value="${esc(u.handle || '')}" placeholder="bob" ${id ? 'disabled' : ''}>
+    <label class="l">Povaha a pravidla</label><textarea id="bp" rows="5" maxlength="1500" placeholder="Jsi vtipný medvěd Bob. Mluvíš česky, krátce a s emoji. Miluješ med a Minecraft.">${esc(u.persona || '')}</textarea>
+    <label class="l">Krátký popis (bio)</label><input id="bb" maxlength="120" value="${esc(u.bio || '')}" placeholder="Vtipný medvěd, co miluje med">
+    <label class="l">Vzhled</label><div class="chips" id="bf">${BOT_FACES.map(e => `<button data-f="${e}" class="${e === face ? 'on' : ''}" style="background:#26262c;font-size:18px">${e}</button>`).join('')}</div>
+    <div class="chips" id="bc" style="margin-top:6px">${COLORS.map(c => `<button data-c="${c}" class="${c === color ? 'on' : ''}" style="background:${c}"></button>`).join('')}</div>
+    <button class="link" id="bimg" style="font-size:13px;margin-top:6px">${avatarImg ? '✅ Vlastní obrázek (klikni pro změnu)' : '🖼️ Nahrát vlastní obrázek'}</button>
+    <div class="mfoot"><button class="link" id="mx2">Zrušit</button><button class="btn sm" id="bok">${id ? 'Uložit' : 'Vytvořit'}</button></div>`, () => {
+    $('mx2').onclick = closeModal;
+    $('bf').querySelectorAll('[data-f]').forEach(b => b.onclick = () => { face = b.dataset.f; $('bf').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); });
+    $('bc').querySelectorAll('[data-c]').forEach(b => b.onclick = () => { color = b.dataset.c; $('bc').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); });
+    $('bimg').onclick = async () => { const i = await pickImage(256); if (i) { avatarImg = i; $('bimg').textContent = '✅ Vlastní obrázek'; } };
+    $('bok').onclick = async () => {
+      const name = $('bn').value.trim(), persona = $('bp').value.trim();
+      if (name.length < 2) return toast('Jméno musí mít aspoň 2 znaky');
+      if (persona.length < 5) return toast('Napiš botovi povahu');
+      const d = { name, persona, bio: $('bb').value.trim(), face, color, avatar: avatarImg || botFace(face, color), bot: true };
+      try {
+        if (id) { await updateDoc(D('dc_users', id), d); toast('✅ Bot uložen'); }
+        else {
+          const h = slug($('bh').value || name); if (!h || h.length < 2) return toast('Zadej uživatelské jméno');
+          if (!(await handleFree(h, null))) return toast('❌ Uživatelské jméno je zabrané');
+          const nid = 'bot_' + Math.random().toString(36).slice(2, 12);
+          await setDoc(D('dc_users', nid), { ...d, handle: h, botOwner: me.uid, since: Date.now(), status: 'online' });
+          await setDoc(D('dc_names', h), { uid: nid });
+          toast(`🤖 ${name} je na světě!`);
+        }
+        closeModal();
+      } catch (e) { fail(e); }
+    };
+  });
+}
+function botFace(e, c) { const cv = document.createElement('canvas'); cv.width = cv.height = 128; const x = cv.getContext('2d'); x.fillStyle = c; x.fillRect(0, 0, 128, 128); x.font = '76px serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(e, 64, 70); return cv.toDataURL('image/png'); }
+const botBusy = {};
+async function botReply(bid, c, srv) {
+  const b = users[bid]; if (!b?.bot || botBusy[bid + c.id]) return;
+  botBusy[bid + c.id] = true;
+  const typ = setInterval(() => setDoc(D('dc_typing', c.id), { [bid]: Date.now() }, { merge: true }).catch(() => {}), 2500);
+  setDoc(D('dc_typing', c.id), { [bid]: Date.now() }, { merge: true }).catch(() => {});
+  try {
+    await new Promise(r => setTimeout(r, 400));
+    const hist = msgs.filter(m => m.ch === c.id && m.text).slice(-14).map(m => ({ role: m.uid === bid ? 'assistant' : 'user', content: m.uid === bid ? m.text : `${nameOf(m.uid)}: ${m.text}` }));
+    const sys = `${b.persona}\n\nJmenuješ se ${b.name} (@${b.handle}). Jsi AI bot v chatovací aplikaci Yaper. Odpovídej v jazyce, kterým ti lidé píšou (většinou česky), krátce jako v chatu (max 3–4 věty). Buď slušný a vhodný pro děti, žádné nadávky ani nebezpečné rady. Nepiš své jméno na začátek zprávy.`;
+    const r = await fetch('https://text.pollinations.ai/openai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'openai', messages: [{ role: 'system', content: sys }, ...hist] }) });
+    if (!r.ok) throw new Error('AI ' + r.status);
+    const j = await r.json();
+    let t = (j.choices?.[0]?.message?.content || '').trim().replace(new RegExp('^' + b.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ':\\s*'), '');
+    if (!t) t = '🤔 …';
+    const d = { ch: c.id, uid: bid, text: censor(t).slice(0, 2000), t: Date.now(), bot: true, by: me.uid };
+    if (srv) d.srv = srv;
+    await addDoc(C('dc_messages'), d);
+    if (c.dm) updateDoc(D('dc_channels', c.id), { last: Date.now() }).catch(() => {});
+  } catch (e) { toast('🤖 Bot teď neodpovídá, zkus to za chvilku'); console.warn(e); }
+  clearInterval(typ); setDoc(D('dc_typing', c.id), { [bid]: 0 }, { merge: true }).catch(() => {});
+  delete botBusy[bid + c.id];
+}
+function botsToAnswer(c, t) {
+  if (c.dm) { const o = c.members.find(x => x !== me.uid); return users[o]?.bot ? [o] : []; }
+  const hs = [...t.matchAll(/@([a-z0-9_.-]+)/gi)].map(m => m[1].toLowerCase());
+  return Object.keys(users).filter(id => users[id].bot && hs.includes((users[id].handle || '').toLowerCase())).slice(0, 3);
+}
+
 /* ---------- SEND ---------- */
 const inp = $('inp');
 let lastTyping = 0, lastSend = 0;
@@ -908,6 +996,7 @@ $('form').onsubmit = async e => {
     await addDoc(C('dc_messages'), d);
     if (c.dm) updateDoc(D('dc_channels', c.id), { last: Date.now() }).catch(() => {});
     setDoc(D('dc_typing', c.id), { [me.uid]: 0 }, { merge: true }).catch(() => {});
+    if (t) botsToAnswer(c, t).forEach(bid => setTimeout(() => botReply(bid, c, d.srv), 600));
   } catch (er) { inp.value = t; pendingImg = img; drawPreview(); fail(er); }
 };
 
@@ -1215,7 +1304,7 @@ setInterval(() => { if (me) checkRing(); }, 5000);
 /* ---------- RIGHT PANEL ---------- */
 function renderRight() {
   const r = $('right');
-  if (view === 'home' && !curDm && homePage === 'nitro') { r.classList.add('hidden'); return; }
+  if (view === 'home' && !curDm && (homePage === 'nitro' || homePage === 'bots')) { r.classList.add('hidden'); return; }
   if (view === 'home' && !curDm) {
     r.classList.remove('hidden');
     const act = friends.filter(f => f.status === 'ok').map(f => f.users.find(x => x !== me.uid)).filter(u => status(u) !== 'offline' && users[u]?.custom);
