@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Chat</title>
+<title>Yaper</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20rx%3D%2226%22%20fill%3D%22%23FC6A39%22/%3E%3Cg%20fill%3D%22%23fff%22%3E%3Ccircle%20cx%3D%2229%22%20cy%3D%2233%22%20r%3D%2211%22/%3E%3Ccircle%20cx%3D%2271%22%20cy%3D%2233%22%20r%3D%2211%22/%3E%3Cellipse%20cx%3D%2250%22%20cy%3D%2257%22%20rx%3D%2233%22%20ry%3D%2226%22/%3E%3C/g%3E%3Cg%20fill%3D%22%23FC6A39%22%3E%3Ccircle%20cx%3D%2237%22%20cy%3D%2254%22%20r%3D%225.5%22/%3E%3Ccircle%20cx%3D%2263%22%20cy%3D%2254%22%20r%3D%225.5%22/%3E%3Cpath%20d%3D%22M42%2063h16a8%209%200%200%201-16%200z%22/%3E%3C/g%3E%3Cpath%20d%3D%22M45.5%2068.5a4.5%203.5%200%200%201%209%200a4.5%203%200%200%201-9%200z%22%20fill%3D%22%23FEDACD%22/%3E%3C/svg%3E">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--rail:#121214;--side:#121214;--main:#0b0b0d;--card:#1a1a1e;--hover:#1f1f24;--sel:#26262c;--line:#26262b;--tx:#dbdee1;--mut:#949ba4;--dim:#6d6f78;--acc:#5865f2;--ok:#23a55a;--idle:#f0b232;--dnd:#f23f43;--bad:#f23f43}
@@ -32,7 +33,8 @@ label.l{display:block;font-size:12px;font-weight:700;color:var(--mut);text-trans
 .rb img{width:100%;height:100%;border-radius:inherit;object-fit:cover}
 .rb:hover,.rb.on{border-radius:16px}
 .rb:hover:not(.img),.rb.on:not(.img){background:var(--acc);color:#fff}
-.rb.home{background:#1f1f24}.rb.home.on,.rb.home:hover{background:var(--acc)}
+.rb.home{background:#FC6A39;padding:0}.rb.home.on,.rb.home:hover{background:#FC6A39;filter:brightness(1.08)}.rb.home svg{width:40px;height:40px}
+.ylogo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px;font-size:26px;font-weight:800;color:#fff}.ylogo svg{width:46px;height:46px}
 .rb.green{color:var(--ok)}.rb.green:hover{background:var(--ok);color:#fff}
 .pill{position:absolute;left:-12px;width:4px;border-radius:0 4px 4px 0;background:#fff;height:0;transition:.15s}
 .rb:hover .pill{height:20px}.rb.on .pill{height:40px}
@@ -155,9 +157,29 @@ label.l{display:block;font-size:12px;font-weight:700;color:var(--mut);text-trans
 .pbio{font-size:13px;color:#cfd1d5;margin:8px 0;white-space:pre-wrap}.plab{font-size:12px;font-weight:700;color:var(--mut);margin-top:10px}
 /* profile editor */
 #prof{position:fixed;inset:0;background:var(--main);z-index:55;display:flex}
-#prof .pl{width:340px;background:var(--side);border-right:1px solid var(--line);overflow-y:auto;padding:16px}
+#prof .pl{width:300px;background:var(--side);border-right:1px solid var(--line);overflow-y:auto;padding:0 12px 16px}
+#prof .phead{position:sticky;top:0;background:var(--side);font-weight:700;font-size:17px;padding:14px 0;border-bottom:1px solid var(--line);margin-bottom:10px;z-index:2}
+.psec{margin-bottom:14px}.pst{font-size:14px;font-weight:700;margin-bottom:8px;color:#fff}
+.tile.big{height:96px;border-radius:12px}.tile.dash{border-style:dashed}.tp{width:34px;height:34px;border-radius:50%;background:#fff;color:#111;display:flex;align-items:center;justify-content:center;font-weight:800}
+.bnbox{display:block;height:56px;border-radius:10px;cursor:pointer;border:1px solid var(--line)}.bnbox input,.tdot input{opacity:0;width:0;height:0;position:absolute}
+.frames{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.frames button{background:#1a1a1e;border:1px solid var(--line);border-radius:10px;padding:10px 4px;font-size:12px;color:var(--mut);display:flex;flex-direction:column;align-items:center;gap:6px}.frames button.on{border-color:var(--acc);color:#fff}
+.fav{width:30px;height:30px;border-radius:50%;background:#3a3c42;display:block}
+.plock{background:linear-gradient(180deg,#2a1b4d,#3b1f5e);border-radius:10px;padding:14px;margin:4px 0 12px;text-align:left;font-weight:600}.plock .lk{width:26px;height:26px;border-radius:50%;background:#000a;display:flex;align-items:center;justify-content:center;margin:0 auto 8px}
+.nlock{opacity:.5}
+.nprev{margin-top:8px;background:#1a1a1e;border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center;font-size:22px;font-weight:800}
+.theme{height:100px;border-radius:10px;position:relative;border:1px solid var(--line)}.tdot{position:absolute;left:50%;transform:translateX(-50%);width:26px;height:26px;border-radius:8px;border:2px solid #fff;cursor:pointer}.tdot:first-child{top:8px}.tdot:last-child{bottom:8px}
+#prof .pw{width:440px;overflow-y:auto;padding:40px 24px 24px 0}
+.ptabs{display:flex;gap:22px;border-bottom:1px solid var(--line);margin-bottom:20px}.ptabs button{padding:0 0 10px;color:var(--mut);font-weight:600;border-bottom:2px solid transparent}.ptabs button.on{color:#fff;border-color:#fff}
+.pempty{text-align:center;color:var(--mut);margin:30px 0 18px;font-size:13px}.pempty b{color:#fff;display:block;margin-bottom:6px}.pempty textarea{margin-top:10px}
+.wgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.wg{background:#1a1a1e;border:1px solid var(--line);border-radius:10px;height:96px;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;font-weight:700;color:#fff;font-size:14px;position:relative;overflow:hidden}.wg:hover{background:#222227}.wg .we{font-size:28px;opacity:.5;position:absolute;left:10px;top:8px}.wg .wt{display:flex;flex-direction:column;align-items:center;gap:4px;z-index:1}.wg .wp{width:24px;height:24px;border-radius:50%;background:#fff;color:#111;display:flex;align-items:center;justify-content:center}.wg small{color:var(--mut);font-weight:500;font-size:11px}.wg.on{border-color:#3a3c42}
+.pcard2{width:400px;background:#141417;border:1px solid var(--line);border-radius:14px;overflow:hidden;position:relative}
+.pcard2 .bn{height:120px}.pcard2 .pa{margin:-60px 0 0 22px;position:relative;display:flex;align-items:flex-start;gap:10px}.pcard2 .pa>.av{border:7px solid #141417;box-sizing:content-box}
+.bubble{margin-top:66px;background:#1f1f24ee;border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:13px;max-width:190px;cursor:pointer;font-style:italic}
+.pcard2 .pb{padding:10px 22px 22px}.pcard2 h2{font-size:26px}.pcard2 .hl{color:#cfd1d5;font-size:14px;margin:4px 0 14px;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.pbtns{display:flex;gap:8px;margin-bottom:14px}.pbtns .ib{width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:#1a1a1e}
+.pinfo{background:#0b1a2b;border:1px solid #2a6fdb;border-radius:10px;padding:12px 30px 12px 12px;font-size:13px;position:relative;margin-bottom:10px}.pinfo button{position:absolute;right:8px;top:8px;color:var(--mut)}
 #prof .pl h3{font-size:18px;margin-bottom:12px}
-#prof .pr{flex:1;overflow-y:auto;display:flex;justify-content:center;padding:40px 20px}
+#prof .pr{flex:1;overflow-y:auto;display:flex;justify-content:center;padding:40px 20px;align-items:flex-start}
 .pcard{width:380px;background:#141417;border:1px solid var(--line);border-radius:14px;overflow:hidden;height:max-content}
 .pcard .bn{height:110px}.pcard .pa{margin:-55px 0 0 20px;border:7px solid #141417;width:120px;height:120px;border-radius:50%}
 .pcard .pb{padding:10px 22px 22px}.pcard h2{font-size:24px}
@@ -165,6 +187,7 @@ label.l{display:block;font-size:12px;font-weight:700;color:var(--mut);text-trans
 .boxed .row2{display:flex;gap:8px}
 .tile{flex:1;height:80px;border-radius:10px;background:#1f1f24;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;background-size:cover;background-position:center;font-size:22px;color:var(--mut)}
 .tile:hover{border-color:var(--acc)}
+@media (max-width:1150px){#prof .pw{display:none}}
 #profX{position:fixed;right:18px;top:14px;z-index:56;width:36px;height:36px;border-radius:50%;border:2px solid var(--mut);color:var(--mut);font-size:16px}
 /* dev */
 .dev{position:fixed;inset:0;background:#000c;z-index:58;display:flex;align-items:center;justify-content:center}
@@ -219,7 +242,7 @@ label.l{display:block;font-size:12px;font-weight:700;color:var(--mut);text-trans
  #rail{left:0}#side{left:72px;width:calc(100vw - 72px);max-width:320px}
  #app.closed #rail,#app.closed #side{transform:translateX(-420px)}
  #top input.srch{display:none}#top .tab:not(.on):not(.add){display:none}
- #prof{flex-direction:column}#prof .pl{width:100%;border:0}#prof .pr{display:none}
+ #prof{flex-direction:column;overflow-y:auto}#prof .pl{width:100%;border:0;overflow:visible}#prof .pr{display:none}#prof .pw{width:100%;padding:16px}
 }
 </style>
 </head>
@@ -227,6 +250,7 @@ label.l{display:block;font-size:12px;font-weight:700;color:var(--mut);text-trans
 <!-- LOGIN -->
 <div id="login">
  <div class="lcard">
+  <div class="ylogo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="26" fill="#FC6A39"/><g fill="#fff"><circle cx="29" cy="33" r="11"/><circle cx="71" cy="33" r="11"/><ellipse cx="50" cy="57" rx="33" ry="26"/></g><g fill="#FC6A39"><circle cx="37" cy="54" r="5.5"/><circle cx="63" cy="54" r="5.5"/><path d="M42 63h16a8 9 0 0 1-16 0z"/></g><path d="M45.5 68.5a4.5 3.5 0 0 1 9 0a4.5 3 0 0 1-9 0z" fill="#FEDACD"/></svg><span>Yaper</span></div>
   <h1 id="lt">Vítej zpátky!</h1><p class="sub" id="lsub">Moc rádi tě znovu vidíme!</p>
   <div id="regWrap" class="hidden">
    <label class="l">Zobrazované jméno</label><input id="lname" maxlength="32" placeholder="Jak tě uvidí ostatní">
@@ -296,7 +320,8 @@ const BANNERS = ['#5865f2','#eb459e','#3ba55c','#e67e22','#9b59b6','#1abc9c','#e
 const REACT = ['👍','😂','❤️','🔥','😮','😢','💀','🎉'];
 const OWNER_EMAIL = 'mrwolfvrcz@gmail.com';
 const I = {
-  home: '<svg width="28" height="22" viewBox="0 0 28 22" fill="currentColor"><path d="M23.7 1.8A23 23 0 0 0 18 0l-.7 1.5a21 21 0 0 0-6.5 0L10 0a23 23 0 0 0-5.7 1.8C.7 7.2-.3 12.5.2 17.7A23 23 0 0 0 7.2 21l1.5-2.4a15 15 0 0 1-2.3-1.1l.6-.4a16.5 16.5 0 0 0 14 0l.6.4c-.7.4-1.5.8-2.3 1.1l1.5 2.4a23 23 0 0 0 7-3.3c.6-6-.9-11.2-4.1-15.9ZM9.4 14.5c-1.4 0-2.5-1.3-2.5-2.8s1.1-2.8 2.5-2.8 2.5 1.3 2.5 2.8-1.1 2.8-2.5 2.8Zm9.2 0c-1.4 0-2.5-1.3-2.5-2.8s1.1-2.8 2.5-2.8 2.5 1.3 2.5 2.8-1.1 2.8-2.5 2.8Z"/></svg>',
+  home: '<svg viewBox="0 0 100 100"><g fill="#fff"><circle cx="29" cy="33" r="11"/><circle cx="71" cy="33" r="11"/><ellipse cx="50" cy="57" rx="33" ry="26"/></g><g fill="#FC6A39"><circle cx="37" cy="54" r="5.5"/><circle cx="63" cy="54" r="5.5"/><path d="M42 63h16a8 9 0 0 1-16 0z"/></g><path d="M45.5 68.5a4.5 3.5 0 0 1 9 0a4.5 3 0 0 1-9 0z" fill="#FEDACD"/></svg>',
+  logo: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="26" fill="#FC6A39"/><g fill="#fff"><circle cx="29" cy="33" r="11"/><circle cx="71" cy="33" r="11"/><ellipse cx="50" cy="57" rx="33" ry="26"/></g><g fill="#FC6A39"><circle cx="37" cy="54" r="5.5"/><circle cx="63" cy="54" r="5.5"/><path d="M42 63h16a8 9 0 0 1-16 0z"/></g><path d="M45.5 68.5a4.5 3.5 0 0 1 9 0a4.5 3 0 0 1-9 0z" fill="#FEDACD"/></svg>',
   friends: '<svg class="ic" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.1a4 4 0 0 1 0 7.8M21 21v-2a4 4 0 0 0-3-3.9"/></svg>',
   addUser: '<svg class="ic" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M19 8v6M16 11h6"/></svg>',
   gear: '<svg class="ic" viewBox="0 0 24 24" style="width:16px;height:16px"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>',
@@ -330,9 +355,9 @@ let pendingImg = null;
 
 /* ---------- NITRO ---------- */
 const TIERS = {
-  nitro: { name: 'Chat Nitro', days: 7, emoji: '💎', grad: 'linear-gradient(135deg,#ff73fa,#5865f2)', perks: ['badge', 'react', 'long', 'banner', 'grad', 'hd', 'bigimg', 'avring'] },
-  neo: { name: 'Chat Nitro Neo', days: 14, emoji: '🔷', grad: 'linear-gradient(135deg,#00c6ff,#5865f2)', perks: ['badge', 'react', 'long', 'banner'] },
-  one: { name: 'Chat Nitro One', days: 29, emoji: '⚪', grad: 'linear-gradient(135deg,#6d6f78,#2b2d31)', perks: ['badge', 'react'] }
+  nitro: { name: 'Yaper Nitro', days: 7, emoji: '💎', grad: 'linear-gradient(135deg,#ff73fa,#5865f2)', perks: ['badge', 'react', 'long', 'banner', 'grad', 'hd', 'bigimg', 'avring'] },
+  neo: { name: 'Yaper Nitro Neo', days: 14, emoji: '🔷', grad: 'linear-gradient(135deg,#00c6ff,#5865f2)', perks: ['badge', 'react', 'long', 'banner'] },
+  one: { name: 'Yaper Nitro One', days: 29, emoji: '⚪', grad: 'linear-gradient(135deg,#6d6f78,#2b2d31)', perks: ['badge', 'react'] }
 };
 const PERK_TX = { badge: 'Odznak u jména', react: 'Extra reakce (24 emoji)', long: 'Zprávy až 4000 znaků', banner: 'Barevné přechody banneru', grad: 'Duhové jméno (přechod barev)', hd: 'HD kamera a sdílení obrazovky 1080p', bigimg: 'Obrázky ve vysoké kvalitě', avring: 'Svítící rámeček avataru' };
 const PERK_ORDER = ['badge', 'react', 'long', 'banner', 'grad', 'hd', 'bigimg', 'avring'];
@@ -359,10 +384,10 @@ function avatar(uid, size = 40, withSt = false, ring = 'var(--side)') {
   const u = users[uid] || { name: '?', color: '#555' };
   const bg = u.avatar ? `background-image:url(${u.avatar});` : `background-color:${u.color || '#5865f2'};`;
   const st = withSt ? `<span class="st ${status(uid)}" style="width:${Math.max(10, size * .33)}px;height:${Math.max(10, size * .33)}px;border-color:${ring}"></span>` : '';
-  const ring2 = perk(uid, 'avring') && size >= 32 ? 'box-shadow:0 0 0 2px #ff73fa,0 0 10px #ff73fa88;' : '';
+  const ring2 = FRAME_CSS[u.frame] && size >= 32 ? 'box-shadow:' + FRAME_CSS[u.frame] + ';' : perk(uid, 'avring') && size >= 32 ? 'box-shadow:0 0 0 2px #ff73fa,0 0 10px #ff73fa88;' : '';
   return `<div class="av" data-vav="${uid}" style="width:${size}px;height:${size}px;font-size:${size * .42}px;${bg}${ring2}">${u.avatar ? '' : esc((u.name || '?')[0].toUpperCase())}${st}</div>`;
 }
-const bannerCss = u => { const b = u?.banner; if (b && b.startsWith('linear')) { const id = Object.keys(users).find(k => users[k] === u); if (id && !perk(id, 'banner')) return u.color || '#5865f2'; } return b || u?.color || '#5865f2'; };
+const bannerCss = u => { if (u?.bannerImg) { const id0 = Object.keys(users).find(k => users[k] === u); if (id0 && perk(id0, 'banner')) return `url(${u.bannerImg}) center/cover`; } const b = u?.banner; if (b && b.startsWith('linear')) { const id = Object.keys(users).find(k => users[k] === u); if (id && !perk(id, 'banner')) return u.color || '#5865f2'; } return b || u?.color || '#5865f2'; };
 const pairId = (a, b) => [a, b].sort().join('_');
 const slug = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9_.]/g, '').slice(0, 24);
 const isImg = v => typeof v === 'string' && v.startsWith('data:');
@@ -473,7 +498,7 @@ function renderAll() {
 /* ---------- RAIL ---------- */
 function renderRail() {
   const pend = friends.filter(f => f.status === 'pending' && f.from !== me.uid).length;
-  let h = `<button class="rb home ${view === 'home' ? 'on' : ''}" id="rHome" title="Přímé zprávy"><span class="pill"></span>${I.home}${pend ? `<span class="badge">${pend}</span>` : ''}</button><div class="rsep"></div>`;
+  let h = `<button class="rb home ${view === 'home' ? 'on' : ''}" id="rHome" title="Yaper – přímé zprávy"><span class="pill"></span>${I.home}${pend ? `<span class="badge">${pend}</span>` : ''}</button><div class="rsep"></div>`;
   for (const s of servers) h += `<button class="rb ${isImg(s.icon) ? 'img' : ''} ${view === s.id ? 'on' : ''}" data-s="${s.id}" title="${esc(s.name)}" style="${isImg(s.icon) || !s.icon ? '' : 'font-size:22px'}"><span class="pill"></span>${srvIco(s)}</button>`;
   h += `<button class="rb green" id="rAdd" title="Přidat server" style="font-size:24px">＋</button><button class="rb green" id="rExp" title="Připojit se k serveru">${I.compass}</button>`;
   $('rail').innerHTML = h;
@@ -484,6 +509,7 @@ function renderRail() {
 }
 
 /* ---------- SIDE ---------- */
+function openNitroPage() { $('pop').classList.add('hidden'); closeProf(); if (view !== 'home') goHome(); curDm = null; homePage = 'nitro'; stopChannel(); renderSide(); renderTop(); renderHomeMain(); renderRight(); }
 function renderSide() {
   if (view === 'home') {
     $('sideHead').innerHTML = `<button class="findbtn" id="findBtn">Najít nebo začít konverzaci</button>`;
@@ -511,7 +537,7 @@ function renderSide() {
   const can = canManage();
   const text = channels.filter(c => c.type !== 'voice'), voice = channels.filter(c => c.type === 'voice');
   const col = JSON.parse(localStorage.getItem('dc_col') || '{}');
-  let h = '';
+  let h = `<div class="nav" id="navEv"><span style="width:20px;text-align:center">📅</span><span class="sp">Události</span></div><div class="nav" id="navBoost"><span style="width:20px;text-align:center">🛡️</span><span class="sp">Vylepšení serveru</span></div><div style="border-top:1px solid var(--line);margin:8px 6px 10px"></div>`;
   const catH = (k, label) => `<div class="cat" data-cat="${k}">${I.chev}<span class="sp">${label}</span>${can ? `<button data-addch="${k}" title="Vytvořit kanál">＋</button>` : ''}</div>`;
   h += catH('text', 'Textové kanály');
   if (!col.text) for (const c of text) h += `<div class="ch ${curCh && curCh.id === c.id ? 'on' : ''}" data-c="${c.id}"><span class="h">#</span><span class="n">${esc(c.name)}</span><span class="ia"><span data-inv="1" title="Pozvat">${I.addUser.replace('class="ic"', 'class="ic" style="width:16px;height:16px"')}</span>${can ? `<span data-edit="${c.id}" title="Upravit kanál">${I.gear}</span>` : ''}</span></div>`;
@@ -521,6 +547,8 @@ function renderSide() {
     for (const [u, v] of freshParts(voiceState[c.id])) h += `<div class="vu" data-vuid="${u}">${avatar(u, 22)}<span style="flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${esc(nameOf(u))}</span>${v.cam ? '📹' : ''}${v.screen ? '<span class="chip r" style="padding:1px 5px;font-size:10px">ŽIVĚ</span>' : ''}${v.deaf ? '🔇' : v.mute ? '🎙️̸' : ''}</div>`;
   }
   $('sideBody').innerHTML = h;
+  $('navEv').onclick = () => toast('📅 Zatím tu nejsou žádné události');
+  $('navBoost').onclick = openNitroPage;
   $('sideBody').querySelectorAll('[data-cat]').forEach(e => e.onclick = ev => { if (ev.target.closest('[data-addch]')) return; col[e.dataset.cat] = !col[e.dataset.cat]; localStorage.setItem('dc_col', JSON.stringify(col)); renderSide(); });
   $('sideBody').querySelectorAll('[data-addch]').forEach(b => b.onclick = () => addChannelModal(b.dataset.addch));
   $('sideBody').querySelectorAll('[data-c]').forEach(e => e.onclick = ev => { if (ev.target.closest('[data-inv]')) return inviteModal(); if (ev.target.closest('[data-edit]')) return editChannelModal(ev.target.closest('[data-edit]').dataset.edit); voiceView = false; selectChannel(e.dataset.c); closeMobile(); });
@@ -565,9 +593,10 @@ function selfPop() {
 function userPop(uid, ev) {
   $('pop').style.width = '';
   const u = users[uid] || {};
+  $('pop').style.background = (perk(uid, 'grad') && themeCss(u)) || '';
   const isF = friends.find(f => f.users.includes(uid) && f.status === 'ok');
-  $('pop').innerHTML = `<div class="bn" style="background:${bannerCss(u)}"></div><div class="pa">${avatar(uid, 80, true, '#141417')}</div><div class="pb"><h3>${esc(u.name)}${roleTag(uid)}</h3><div class="hn">${esc(u.handle || '')}${u.custom ? ' • ' + esc(u.custom) : ''}</div>
-   ${u.bio ? `<div class="plab">O mně</div><div class="pbio">${esc(u.bio)}</div>` : ''}<div class="plab">Členem od</div><div class="pbio">${u.since ? new Date(u.since).toLocaleDateString('cs-CZ') : '—'}</div>
+  $('pop').innerHTML = `<div class="bn" style="background:${bannerCss(u)}"></div><div class="pa">${avatar(uid, 80, true, '#141417')}</div><div class="pb"><h3>${esc(u.name)}${roleTag(uid)}</h3><div class="hn">${esc(u.handle || '')}${u.pron ? ' • ' + esc(u.pron) : ''}</div>${u.custom ? `<div class="pbio" style="font-style:italic">💭 ${esc(u.custom)}</div>` : ''}
+   ${u.bio ? `<div class="plab">Bio</div><div class="pbio">${esc(u.bio)}</div>` : ''}${WIDGETS.filter(w => u.widgets?.[w[0]]).map(w => `<div class="plab">${w[1]} ${w[2]}</div><div class="pbio">${esc(u.widgets[w[0]])}</div>`).join('')}${u.wish ? `<div class="plab">🎁 Seznam přání</div><div class="pbio">${esc(u.wish)}</div>` : ''}<div class="plab">Členem od</div><div class="pbio">${u.since ? new Date(u.since).toLocaleDateString('cs-CZ') : '—'}</div>
    ${isOwner() ? `<div class="pbox"><div class="it" id="pGive">💎<span class="sp">Dát Nitro</span></div></div>` : ''}${uid !== me.uid ? `<div class="pbox"><div class="it" id="pMsg">💬<span class="sp">Poslat zprávu</span></div>${isF ? '' : `<div class="it" id="pAdd">➕<span class="sp">Přidat do přátel</span></div>`}</div>` : ''}</div>`;
   placePop(ev.clientX + 10, ev.clientY - 60);
   const g = $('pGive'); if (g) g.onclick = () => { $('pop').classList.add('hidden'); giveNitroModal(uid); };
@@ -579,7 +608,7 @@ function userPop(uid, ev) {
 function renderTop() {
   let h = '<button class="tb" id="menuBtn">☰</button>';
   if (view === 'home' && !curDm && homePage === 'nitro') {
-    h += `<span class="tt">💎 Chat Nitro</span><span class="sp"></span>`;
+    h += `<span class="tt">💎 Yaper Nitro</span><span class="sp"></span>`;
   } else if (view === 'home' && !curDm) {
     const pend = friends.filter(f => f.status === 'pending' && f.from !== me.uid).length;
     h += `<span class="tt">${I.friends} Přátelé</span><span style="color:var(--dim)">•</span>
@@ -656,7 +685,7 @@ function renderHomeMain() {
 }
 function renderNitro() {
   const n = users[me.uid]?.nitro, t = tierOf(me.uid), claimed = users[me.uid]?.nitroMonth === monthKey();
-  let h = `<div class="flist" style="max-width:1050px;margin:0 auto;width:100%"><div class="nhero"><h1>💎 Chat Nitro</h1><p>Každý měsíc si zdarma vybereš jeden tarif. Kratší = víc funkcí, delší = míň funkcí.</p>
+  let h = `<div class="flist" style="max-width:1050px;margin:0 auto;width:100%"><div class="nhero"><h1>💎 Yaper Nitro</h1><p>Každý měsíc si zdarma vybereš jeden tarif. Kratší = víc funkcí, delší = míň funkcí.</p>
     <p style="margin-top:10px;font-weight:700">${t ? `Máš ${TIERS[t].emoji} ${TIERS[t].name} ${untilTx(n)}` : claimed ? 'Tento měsíc už sis Nitro vybral. Další bude zase příští měsíc 🙂' : 'Tento měsíc si můžeš vybrat zdarma 🎁'}</p></div><div class="plans">`;
   for (const [k, T] of Object.entries(TIERS)) {
     const can = !t && !claimed;
@@ -803,7 +832,9 @@ function renderMsgs(scroll) {
        <button class="step ${st.invite ? 'done' : ''}" data-step="invite"><span class="e">💌</span><span class="sp">Pozvi přátele</span><span class="ar">${st.invite ? '✓' : '›'}</span></button>
        <button class="step ${isImg(curSrv.icon) ? 'done' : ''}" data-step="icon"><span class="e">🎨</span><span class="sp">Přizpůsob si server ikonou</span><span class="ar">${isImg(curSrv.icon) ? '✓' : '›'}</span></button>
        <button class="step ${msgs.length ? 'done' : ''}" data-step="msg"><span class="e">✉️</span><span class="sp">Pošli svou první zprávu</span><span class="ar">${msgs.length ? '✓' : '›'}</span></button>
-       <button class="step" data-step="ch"><span class="e">➕</span><span class="sp">Vytvoř nový kanál</span><span class="ar">›</span></button></div>`;
+       <button class="step" data-step="ch"><span class="e">➕</span><span class="sp">Vytvoř nový kanál</span><span class="ar">›</span></button>
+       <button class="step" data-step="app"><span class="e">🎮</span><span class="sp">Přidej svou první aplikaci</span><span class="ar">›</span></button>
+       <button class="step" data-step="boost"><span class="e">💎</span><span class="sp">Odemkni výhody pro všechny pomocí vylepšení</span><span class="ar">›</span></button></div>`;
     } else h = `<div class="chwel"><div class="big">#</div><h2>Vítej v #${esc(c.name)}!</h2><p>Toto je začátek kanálu #${esc(c.name)}.</p></div>`;
   }
   let prev = null;
@@ -834,7 +865,7 @@ function renderMsgs(scroll) {
   });
   box.querySelectorAll('[data-step]').forEach(b => b.onclick = () => {
     const s = b.dataset.step;
-    if (s === 'invite') inviteModal(); if (s === 'icon') serverSettings(); if (s === 'msg') $('inp').focus(); if (s === 'ch') addChannelModal('text');
+    if (s === 'invite') inviteModal(); if (s === 'icon') serverSettings(); if (s === 'msg') $('inp').focus(); if (s === 'ch') addChannelModal('text'); if (s === 'app') toast('🎮 Aplikace přijdou brzy'); if (s === 'boost') openNitroPage();
   });
   if (scroll) box.scrollTop = box.scrollHeight;
 }
@@ -843,7 +874,7 @@ async function toggleReact(m, e) { const has = (m.rx?.[e] || []).includes(me.uid
 function msgAction(a, m) {
   if (a === 'del') { if (confirm('Opravdu smazat zprávu?')) deleteDoc(D('dc_messages', m.id)).catch(fail); }
   if (a === 'reply') { const hd = users[m.uid]?.handle; if (hd) { $('inp').value = '@' + hd + ' ' + $('inp').value; $('inp').focus(); } }
-  if (a === 'react') modal(`<button class="mx" id="mx">✕</button><h2>Přidat reakci</h2><div class="chips" style="justify-content:center;gap:8px;margin-top:12px">${(perk(me.uid, 'react') ? REACT.concat(REACT_PLUS) : REACT).map(e => `<button data-e="${e}" style="width:46px;height:46px;border-radius:10px;background:#1f1f24;font-size:24px">${e}</button>`).join('')}</div>${perk(me.uid, 'react') ? '' : '<p style="text-align:center;color:var(--mut);font-size:13px;margin-top:12px">💎 Víc reakcí s Chat Nitro</p>'}`, () => {
+  if (a === 'react') modal(`<button class="mx" id="mx">✕</button><h2>Přidat reakci</h2><div class="chips" style="justify-content:center;gap:8px;margin-top:12px">${(perk(me.uid, 'react') ? REACT.concat(REACT_PLUS) : REACT).map(e => `<button data-e="${e}" style="width:46px;height:46px;border-radius:10px;background:#1f1f24;font-size:24px">${e}</button>`).join('')}</div>${perk(me.uid, 'react') ? '' : '<p style="text-align:center;color:var(--mut);font-size:13px;margin-top:12px">💎 Víc reakcí s Yaper Nitro</p>'}`, () => {
     $('mcard').querySelectorAll('[data-e]').forEach(b => b.onclick = () => { toggleReact(m, b.dataset.e); closeModal(); });
   });
   if (a === 'edit') modal(`<button class="mx" id="mx">✕</button><h2>Upravit zprávu</h2><textarea id="edt" rows="4" maxlength="2000">${esc(m.text)}</textarea><div class="mfoot"><button class="link" id="mx2">Zrušit</button><button class="btn sm" id="mok">Uložit</button></div>`, () => {
@@ -1090,7 +1121,7 @@ async function toggleScreen() {
     try { call.screen = await navigator.mediaDevices.getDisplayMedia({ video: { height: hd ? 1080 : 720, frameRate: hd ? 30 : 15 }, audio: false }); } catch { return; }
     call.screen.getVideoTracks()[0].onended = () => { if (call && call.screen) { call.screen = null; pushVideo(); myVoice({ screen: false }); renderCallView(); } };
     if (call.cam) { call.cam.getTracks().forEach(t => t.stop()); call.cam = null; myVoice({ cam: false }); }
-    if (!hd) toast('🖥️ Sdílíš v 720p. V 1080p s 💎 Chat Nitro');
+    if (!hd) toast('🖥️ Sdílíš v 720p. V 1080p s 💎 Yaper Nitro');
   }
   pushVideo(); myVoice({ screen: !!call.screen }); renderCallView();
 }
@@ -1378,38 +1409,90 @@ function serverSettings() {
 }
 
 /* ---------- PROFILE EDITOR ---------- */
+const FRAMES = { '': 'Žádný', gold: 'Zlatý', neon: 'Neon', fire: 'Oheň', rainbow: 'Duha', ice: 'Led' };
+const FRAME_CSS = { gold: '0 0 0 3px #ffd43b,0 0 12px #ffb300', neon: '0 0 0 3px #19e3ff,0 0 14px #19e3ff', fire: '0 0 0 3px #ff6a00,0 0 16px #ff2a00', rainbow: '0 0 0 3px #ff73fa,0 0 0 6px #5865f2,0 0 14px #57f287', ice: '0 0 0 3px #bfe9ff,0 0 14px #7fd3ff' };
+const WIDGETS = [['fav', '🎮', 'Oblíbená hra'], ['like', '❤️', 'Hry, které se mi líbí'], ['loop', '🔁', 'Hry, které točím dokola'], ['want', '⭐', 'Chci si zahrát'], ['music', '🎵', 'Oblíbená hudba'], ['show', '📺', 'Oblíbený seriál']];
+const themeCss = u => Array.isArray(u?.theme) && u.theme.length === 2 ? `linear-gradient(180deg,${u.theme[0]},${u.theme[1]})` : '';
 function openProfileEditor() {
   const p = myP();
-  let st = { name: p.name || '', handle: p.handle || '', bio: p.bio || '', avatar: p.avatar || '', banner: p.banner || '', color: p.color || '#5865f2', nameGrad: p.nameGrad || '' };
-  const card = () => `<div class="pcard"><div class="bn" style="background:${st.banner || st.color}"></div><div class="pa">${(() => { const bg = st.avatar ? `background-image:url(${st.avatar})` : `background-color:${st.color}`; return `<div class="av" style="width:106px;height:106px;font-size:44px;${bg}">${st.avatar ? '' : esc((st.name || '?')[0].toUpperCase())}<span class="st ${status(me.uid)}" style="width:30px;height:30px;border-color:#141417;border-width:5px"></span></div>`; })()}</div>
-    <div class="pb"><h2><span class="${perk(me.uid, 'grad') && st.nameGrad ? 'gname' : ''}" style="${perk(me.uid, 'grad') && st.nameGrad ? 'background-image:' + st.nameGrad : ''}">${esc(st.name)}</span>${roleTag(me.uid)}</h2><div style="color:var(--mut);margin-bottom:12px">${esc(st.handle)}</div>
-    <div class="plab">O mně</div><div class="pbio">${st.bio ? esc(st.bio) : '<i style="color:var(--dim)">Popiš se třemi smajlíky</i>'}</div>
-    <div class="plab">Členem od</div><div class="pbio">${p.since ? new Date(p.since).toLocaleDateString('cs-CZ') : '—'}</div></div></div>`;
+  let st = { name: p.name || '', handle: p.handle || '', pron: p.pron || '', bio: p.bio || '', avatar: p.avatar || '', banner: p.banner || '', bannerImg: p.bannerImg || '', color: p.color || '#5865f2', nameGrad: p.nameGrad || '', custom: p.custom || '', theme: Array.isArray(p.theme) ? p.theme.slice() : '', frame: p.frame || '', widgets: { ...(p.widgets || {}) }, wish: p.wish || '' };
+  let tab = 'board', hideInfo = false;
+  const nitroOk = perk(me.uid, 'grad'), bnOk = perk(me.uid, 'banner');
+  const bnCss = () => st.bannerImg && bnOk ? `url(${st.bannerImg}) center/cover` : (st.banner || st.color);
+  const card = () => { const th = themeCss(st); return `<div class="pcard2" style="${th ? 'background:' + th : ''}"><div class="bn" style="background:${bnCss()}"></div>
+    <div class="pa"><div class="av" style="width:120px;height:120px;font-size:50px;${st.avatar ? `background-image:url(${st.avatar})` : `background-color:${st.color}`};${FRAME_CSS[st.frame] ? 'box-shadow:' + FRAME_CSS[st.frame] : ''}">${st.avatar ? '' : esc((st.name || '?')[0].toUpperCase())}<span class="st ${status(me.uid)}" style="width:30px;height:30px;border-color:#141417;border-width:5px"></span></div>
+    <div class="bubble" id="pBub">${st.custom ? esc(st.custom) : '<span style="color:var(--dim)">⊕ Co máš na srdci?</span>'}</div></div>
+    <div class="pb"><h2><span class="${nitroOk && st.nameGrad ? 'gname' : ''}" style="${nitroOk && st.nameGrad ? 'background-image:' + st.nameGrad : ''}">${esc(st.name || 'Jméno')}</span></h2>
+    <div class="hl">${esc(st.handle)} • <span style="color:var(--dim)">${st.pron ? esc(st.pron) : 'Přidej zájmena'}</span> ${roleTag(me.uid)}</div>
+    <div class="pbtns"><button class="btn sm" style="width:auto;margin:0;padding:8px 14px">💬 Zpráva</button><button class="ib">👥</button><button class="ib">⋯</button></div>
+    ${hideInfo ? '' : `<div class="pinfo">Tvůj úplný profil vidí přátelé a lidé na tvých serverech. Kdykoli ho tu můžeš upravit.<button id="pInfoX">✕</button></div>`}
+    <div class="plab">Bio</div><div class="pbio">${st.bio ? esc(st.bio) : '<i style="color:var(--dim)">Popiš se třemi smajlíky</i>'}</div>
+    <div class="plab">Členem od</div><div class="pbio">${p.since ? new Date(p.since).toLocaleDateString('cs-CZ') : '—'}</div>
+    <div class="plab">Propojení</div><div class="pbio" style="color:var(--mut)">＋ Přidat spojení</div>
+    <div class="plab">Poznámka (viditelná pouze pro tebe)</div><div class="pbio" style="color:var(--dim)">Kliknutím přidej poznámku</div></div></div>`; };
+  const board = () => {
+    if (tab === 'act') return `<div class="pempty"><div style="font-size:42px">🕹️</div><b>Zatím žádná aktivita</b><p>Až budeš v hlasovém kanálu nebo psát zprávy, uvidíš to tady.</p></div>`;
+    if (tab === 'wish') return `<div class="pempty" style="text-align:left"><b>🎁 Seznam přání</b><p>Napiš, co by sis přál (jedna věc na řádek).</p><textarea id="pWish" rows="8" maxlength="400" placeholder="Např. Minecraft, KSP...">${esc(st.wish)}</textarea></div>`;
+    return `<div class="pempty"><b style="font-size:16px">Přizpůsob si svůj profil pomocí widgetů</b><p>Vyber si widget a poděl se o informace o sobě a svých zájmech</p></div>
+      <div class="wgrid">${WIDGETS.map(([k, e, t]) => `<button class="wg ${st.widgets[k] ? 'on' : ''}" data-w="${k}"><span class="we">${e}</span><span class="wt">${st.widgets[k] ? `<small>${t}</small>${esc(st.widgets[k])}` : `<span class="wp">＋</span>${t}`}</span></button>`).join('')}</div>`;
+  };
+  const sec = (t, body) => `<div class="psec"><div class="pst">${t}</div>${body}</div>`;
+  const lock = `<div class="plock"><div class="lk">🔒</div><div>Vyšperkuj svůj vzhled – pouze s <span style="color:#00a8fc">Nitrem</span></div><button class="btn sm" id="pNitroPrev" style="margin:10px 0 0">👁 Náhled Nitra</button></div>`;
   const draw = () => {
-    $('prof').innerHTML = `<div class="pl"><h3>Hlavní profil</h3>
-      <div class="boxed"><label class="l" style="margin-top:0">Zobrazované jméno</label><input id="pn" maxlength="32" value="${esc(st.name)}">
-      <label class="l">Uživatelské jméno</label><input id="ph" maxlength="24" value="${esc(st.handle)}"></div>
-      <div class="boxed"><label class="l" style="margin-top:0">Avatar</label><div class="row2"><div class="tile" id="pAv" style="${st.avatar ? `background-image:url(${st.avatar})` : ''}">${st.avatar ? '' : '＋'}</div><div class="tile" id="pAvRm">🗑️</div></div>
-      <label class="l">Barva avataru</label><div class="chips">${COLORS.map(c => `<button data-c="${c}" class="${c === st.color ? 'on' : ''}" style="background:${c}"></button>`).join('')}</div></div>
-      <div class="boxed"><label class="l" style="margin-top:0">Barva banneru</label><div class="chips">${BANNERS.map(c => { const lock = c.startsWith('linear') && !perk(me.uid, 'banner'); return `<button data-bn="${c}" ${lock ? 'data-lock="1" title="Jen s Nitro"' : ''} class="${c === st.banner ? 'on' : ''}" style="background:${c};${lock ? 'opacity:.35' : ''}">${lock ? '🔒' : ''}</button>`; }).join('')}</div></div>
-      <div class="boxed"><label class="l" style="margin-top:0">💎 Duhové jméno ${perk(me.uid, 'grad') ? '' : '(jen Chat Nitro)'}</label><div class="chips"><button data-ng="" class="${!st.nameGrad ? 'on' : ''}" style="background:#26262c">✕</button>${NAME_GRADS.map(g => `<button data-ng="${g}" ${perk(me.uid, 'grad') ? '' : 'data-lock="1"'} class="${g === st.nameGrad ? 'on' : ''}" style="background:${g};${perk(me.uid, 'grad') ? '' : 'opacity:.35'}">${perk(me.uid, 'grad') ? '' : '🔒'}</button>`).join('')}</div></div>
-      <div class="boxed"><label class="l" style="margin-top:0">O mně</label><textarea id="pbio" rows="4" maxlength="190" placeholder="Popiš se třemi smajlíky">${esc(st.bio)}</textarea></div>
+    $('prof').innerHTML = `<div class="pl"><div class="phead">Hlavní profil ⌄</div>
+      ${sec('Zobrazované jméno', `<input id="pn" maxlength="32" value="${esc(st.name)}">`)}
+      ${sec('Uživatelské jméno', `<input id="ph" maxlength="24" value="${esc(st.handle)}">`)}
+      ${sec('Zájmena', `<input id="ppr" maxlength="20" placeholder="Přidej zájmena" value="${esc(st.pron)}">`)}
+      ${sec('Avatar a vzhled', `<div class="row2"><div class="tile big" id="pAv">${st.avatar ? `<div class="av" style="width:72px;height:72px;background-image:url(${st.avatar})"></div>` : '<span class="tp">＋</span>'}</div><div class="tile big dash" id="pAvRm" title="Odebrat avatar">${st.avatar ? '🗑️' : '<span class="tp">＋</span>'}</div></div><div class="chips" style="margin-top:8px">${COLORS.map(c => `<button data-c="${c}" class="${c === st.color ? 'on' : ''}" style="background:${c}"></button>`).join('')}</div>`)}
+      ${sec('Barva banneru', `<label class="bnbox" style="background:${st.banner || st.color}"><input type="color" id="pBnC" value="${/^#/.test(st.banner) ? st.banner : st.color}"></label><div class="chips" style="margin-top:8px">${BANNERS.filter(c => !c.startsWith('linear')).map(c => `<button data-bn="${c}" class="${c === st.banner ? 'on' : ''}" style="background:${c}"></button>`).join('')}</div>`)}
+      ${sec('Efekt a rámeček profilu', `<div class="frames">${Object.entries(FRAMES).map(([k, v]) => `<button data-fr="${k}" class="${st.frame === k ? 'on' : ''}"><span class="fav" style="${FRAME_CSS[k] ? 'box-shadow:' + FRAME_CSS[k] : ''}"></span>${v}</button>`).join('')}</div>`)}
+      ${sec('Status', `<input id="pcu" maxlength="60" placeholder="Co máš na srdci?" value="${esc(st.custom)}">`)}
+      ${sec('Bio', `<textarea id="pbio" rows="3" maxlength="190" placeholder="Popiš se třemi smajlíky">${esc(st.bio)}</textarea>`)}
+      ${nitroOk ? '' : lock}
+      <div class="${nitroOk ? '' : 'nlock'}">
+      ${sec('Styl zobrazovaného jména', `<div class="chips"><button data-ng="" class="${!st.nameGrad ? 'on' : ''}" style="background:#26262c">✕</button>${NAME_GRADS.map(g => `<button data-ng="${g}" class="${g === st.nameGrad ? 'on' : ''}" style="background:${g}"></button>`).join('')}</div><div class="nprev"><span class="${st.nameGrad ? 'gname' : ''}" style="${st.nameGrad ? 'background-image:' + st.nameGrad : ''}">${esc(st.name || 'Jméno')}</span></div>`)}
+      ${sec('Motiv profilu', `<div class="theme" style="background:${themeCss(st) || '#1f1f24'}"><label class="tdot" style="background:${st.theme ? st.theme[0] : '#ff73fa'}"><input type="color" id="pT1" value="${st.theme ? st.theme[0] : '#c800ff'}"></label><label class="tdot" style="background:${st.theme ? st.theme[1] : '#57e0ff'}"><input type="color" id="pT2" value="${st.theme ? st.theme[1] : '#57e0ff'}"></label></div>${st.theme ? '<button class="link" id="pTx" style="font-size:12px">Odebrat motiv</button>' : ''}`)}
+      ${sec('Banner profilu', `<div class="tile big" id="pBnImg" style="height:100px;${st.bannerImg ? `background-image:url(${st.bannerImg})` : ''}">${st.bannerImg ? '' : '🖼️ Nahrát obrázek'}</div>${st.bannerImg ? '<button class="link" id="pBnX" style="font-size:12px">Odebrat banner</button>' : ''}`)}
+      </div>
       <button class="btn" id="psave">Uložit změny</button><button class="btn gray" id="pout">Odhlásit se</button></div>
-      <div class="pr" id="pPrev">${card()}</div>`;
-    const live = () => { $('pPrev').innerHTML = card(); };
+      <div class="pr"><div id="pPrev">${card()}</div></div>
+      <div class="pw"><div class="ptabs"><button data-pt="board" class="${tab === 'board' ? 'on' : ''}">Nástěnka</button><button data-pt="act" class="${tab === 'act' ? 'on' : ''}">Aktivita</button><button data-pt="wish" class="${tab === 'wish' ? 'on' : ''}">Seznam přání</button></div><div id="pBoard">${board()}</div></div>`;
+    const P = $('prof');
+    const live = () => { $('pPrev').innerHTML = card(); bindCard(); };
+    const bindCard = () => { const x = $('pInfoX'); if (x) x.onclick = () => { hideInfo = true; live(); }; $('pBub').onclick = () => $('pcu').focus(); };
+    bindCard();
+    const bindBoard = () => {
+      P.querySelectorAll('[data-w]').forEach(b => b.onclick = () => { const w = WIDGETS.find(x => x[0] === b.dataset.w); const v = prompt(w[2] + ' (prázdné = odebrat):', st.widgets[w[0]] || ''); if (v === null) return; if (v.trim()) st.widgets[w[0]] = v.trim().slice(0, 60); else delete st.widgets[w[0]]; $('pBoard').innerHTML = board(); bindBoard(); });
+      const wi = $('pWish'); if (wi) wi.oninput = () => st.wish = wi.value;
+    };
+    bindBoard();
+    P.querySelectorAll('[data-pt]').forEach(b => b.onclick = () => { tab = b.dataset.pt; draw(); });
+    const needN = () => { toast('🔒 Tohle je jen s Yaper Nitro'); return true; };
     $('pn').oninput = () => { st.name = $('pn').value; live(); };
     $('ph').oninput = () => { st.handle = slug($('ph').value); live(); };
+    $('ppr').oninput = () => { st.pron = $('ppr').value; live(); };
+    $('pcu').oninput = () => { st.custom = $('pcu').value; live(); };
     $('pbio').oninput = () => { st.bio = $('pbio').value; live(); };
     $('pAv').onclick = async () => { const i = await pickImage(256); if (i) { st.avatar = i; draw(); } };
-    $('pAvRm').onclick = () => { st.avatar = ''; draw(); };
-    $('prof').querySelectorAll('[data-c]').forEach(b => b.onclick = () => { st.color = b.dataset.c; draw(); });
-    $('prof').querySelectorAll('[data-bn]').forEach(b => b.onclick = () => { if (b.dataset.lock) return toast('🔒 Přechody banneru jsou pro Chat Nitro a Neo'); st.banner = b.dataset.bn; draw(); });
-    $('prof').querySelectorAll('[data-ng]').forEach(b => b.onclick = () => { if (b.dataset.lock) return toast('🔒 Duhové jméno je jen pro Chat Nitro'); st.nameGrad = b.dataset.ng; draw(); });
+    $('pAvRm').onclick = async () => { if (st.avatar) { st.avatar = ''; draw(); } else { const i = await pickImage(256); if (i) { st.avatar = i; draw(); } } };
+    P.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { st.color = b.dataset.c; draw(); });
+    P.querySelectorAll('[data-bn]').forEach(b => b.onclick = () => { st.banner = b.dataset.bn; draw(); });
+    $('pBnC').onchange = e => { st.banner = e.target.value; draw(); };
+    P.querySelectorAll('[data-fr]').forEach(b => b.onclick = () => { st.frame = b.dataset.fr; draw(); });
+    P.querySelectorAll('[data-ng]').forEach(b => b.onclick = () => { if (!nitroOk) return needN(); st.nameGrad = b.dataset.ng; draw(); });
+    $('pT1').onchange = e => { if (!nitroOk) return needN(); st.theme = [e.target.value, st.theme ? st.theme[1] : '#57e0ff']; draw(); };
+    $('pT2').onchange = e => { if (!nitroOk) return needN(); st.theme = [st.theme ? st.theme[0] : '#c800ff', e.target.value]; draw(); };
+    if (!nitroOk) P.querySelectorAll('.nlock input').forEach(i => i.disabled = true);
+    const tx = $('pTx'); if (tx) tx.onclick = () => { st.theme = ''; draw(); };
+    $('pBnImg').onclick = async () => { if (!bnOk) return needN(); const i = await pickImage(640); if (i) { st.bannerImg = i; draw(); } };
+    const bx = $('pBnX'); if (bx) bx.onclick = () => { st.bannerImg = ''; draw(); };
+    const np = $('pNitroPrev'); if (np) np.onclick = openNitroPage;
     $('pout').onclick = () => { if (confirm('Odhlásit se?')) { closeProf(); signOut(auth); } };
     $('psave').onclick = async () => {
       if (st.name.trim().length < 2) { toast('Jméno musí mít aspoň 2 znaky'); return; }
       try {
-        const d = { name: st.name.trim(), bio: st.bio.trim(), avatar: st.avatar, banner: st.banner, color: st.color, nameGrad: st.nameGrad };
+        const d = { name: st.name.trim(), pron: st.pron.trim(), bio: st.bio.trim(), custom: st.custom.trim(), avatar: st.avatar, banner: st.banner, bannerImg: st.bannerImg, color: st.color, nameGrad: st.nameGrad, theme: st.theme || '', frame: st.frame, widgets: st.widgets, wish: st.wish.trim() };
+        if (JSON.stringify(d).length > 900000) { toast('❌ Obrázky jsou moc velké'); return; }
         if (st.handle && st.handle !== p.handle) {
           if (!(await handleFree(st.handle, me.uid))) { toast('❌ Uživatelské jméno je zabrané'); return; }
           await setDoc(D('dc_names', st.handle), { uid: me.uid });
@@ -1434,7 +1517,7 @@ function applyGlobals() {
   if (isOwner() && !users[me.uid]?.owner) updateDoc(D('dc_users', me.uid), { owner: true }).catch(() => {});
   if (isOwner() && users[me.uid] && !(users[me.uid].nitro?.tier === 'nitro' && users[me.uid].nitro?.until === -1)) updateDoc(D('dc_users', me.uid), { nitro: { tier: 'nitro', until: -1, by: me.uid } }).catch(() => {});
   $('maint').classList.toggle('hidden', !(settings.maint && !isDev()));
-  $('maintMsg').textContent = settings.maintMsg || 'Vylepšujeme chat, za chvíli jsme zpátky 🙂';
+  $('maintMsg').textContent = settings.maintMsg || 'Vylepšujeme Yaper, za chvíli jsme zpátky 🙂';
   if (!$('dev').classList.contains('hidden')) renderDev();
   renderTop(); renderRight();
 }
@@ -1465,7 +1548,7 @@ function renderDev() {
   if (devTab === 'users') h = `<input id="devQ" placeholder="🔍 Hledat uživatele" value="${esc(window._dq || '')}" style="margin-bottom:8px">` + uids.filter(u => ((users[u].name || '') + (users[u].handle || '')).toLowerCase().includes((window._dq || '').toLowerCase())).sort((a, b) => (users[b].seen || 0) - (users[a].seen || 0)).map(userRow).join('');
   if (devTab === 'bans') h = banned.length ? banned.map(userRow).join('') : '<p style="color:var(--mut)">Nikdo nemá ban 🎉</p>';
   if (devTab === 'servers') h = allServers.length ? allServers.map(s => `<div class="drow"><span class="rb" style="width:36px;height:36px;font-size:12px">${srvIco(s)}</span><span class="nm">${esc(s.name)} <span style="color:var(--mut);font-size:12px">· ${(s.members || []).length} členů · majitel ${esc(users[s.owner]?.name || '?')}</span></span><button class="chip g" data-join="${s.id}">Vstoupit</button>${own ? `<button class="chip r" data-delsrv="${s.id}">Smazat</button>` : ''}</div>`).join('') : '<p style="color:var(--mut)">Zatím žádné servery</p>';
-  if (devTab === 'maint' && own) h = `<p style="margin-bottom:10px">Údržba skryje chat všem kromě tebe a devů.</p><label class="l">Zpráva</label><input id="mMsg" value="${esc(settings.maintMsg || '')}" placeholder="Vylepšujeme chat, za chvíli jsme zpátky 🙂"><button class="btn ${settings.maint ? '' : 'red'}" id="mToggle" style="${settings.maint ? 'background:var(--ok)' : ''}">${settings.maint ? '✅ Vypnout údržbu' : '🔧 Zapnout údržbu'}</button>`;
+  if (devTab === 'maint' && own) h = `<p style="margin-bottom:10px">Údržba skryje chat všem kromě tebe a devů.</p><label class="l">Zpráva</label><input id="mMsg" value="${esc(settings.maintMsg || '')}" placeholder="Vylepšujeme Yaper, za chvíli jsme zpátky 🙂"><button class="btn ${settings.maint ? '' : 'red'}" id="mToggle" style="${settings.maint ? 'background:var(--ok)' : ''}">${settings.maint ? '✅ Vypnout údržbu' : '🔧 Zapnout údržbu'}</button>`;
   $('devBody').innerHTML = h;
   const B = $('devBody');
   const q = $('devQ'); if (q) q.oninput = () => { window._dq = q.value; renderDev(); const n = $('devQ'); n.focus(); n.setSelectionRange(n.value.length, n.value.length); };
